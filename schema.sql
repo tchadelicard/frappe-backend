@@ -1,18 +1,28 @@
-DROP TABLE IF EXISTS user;
-DROP TABLE IF EXISTS supervisor;
-DROP TABLE IF EXISTS student;
-DROP TABLE IF EXISTS student_cirriculum;
-DROP TABLE IF EXISTS cirriculum;
-DROP TABLE IF EXISTS credit_transfer;
-DROP TABLE IF EXISTS campus;
-DROP TABLE IF EXISTS campus_specialty;
-DROP TABLE IF EXISTS specialty;
-DROP TABLE IF EXISTS student_specialty_per_year;
-DROP TABLE IF EXISTS meeting_request;
-DROP TABLE IF EXISTS internship_request;
-DROP TABLE IF EXISTS action;
+DROP TABLE IF EXISTS internship_requests;
+DROP TABLE IF EXISTS actions;
+DROP TABLE IF EXISTS meeting_requests;
+DROP TABLE IF EXISTS students_specialties_per_year;
+DROP TABLE IF EXISTS campuses_specialties;
+DROP TABLE IF EXISTS specialties;
+DROP TABLE IF EXISTS campuses;
+DROP TABLE IF EXISTS credit_transfers;
+DROP TABLE IF EXISTS students_curriculums;
+DROP TABLE IF EXISTS curriculums;
+DROP TABLE IF EXISTS students;
+DROP TABLE IF EXISTS supervisors;
+DROP TABLE IF EXISTS users;
 
-CREATE TABLE user (
+CREATE TABLE campuses (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE specialties (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(255) NOT NULL,
     password VARCHAR(255) NOT NULL,
@@ -21,78 +31,71 @@ CREATE TABLE user (
     email VARCHAR(255) NOT NULL,
     phone_number VARCHAR(255) NOT NULL,
     campus_id INTEGER NOT NULL,
-    FOREIGN KEY (campus_id) REFERENCES campus(id)
+    FOREIGN KEY (campus_id) REFERENCES campuses(id)
 );
 
-CREATE TABLE supervisor (
+CREATE TABLE supervisors (
     id INTEGER PRIMARY KEY,
     meeting_url VARCHAR(255),
     caldav_username VARCHAR(255),
     caldav_password VARCHAR(255),
-    FOREIGN KEY (id) REFERENCES user(id)
-)
+    FOREIGN KEY (id) REFERENCES users(id)
+);
 
-CREATE TABLE student (
+CREATE TABLE credit_transfers (
+    id SERIAL PRIMARY KEY,
+    university VARCHAR(255) NOT NULL,
+    country VARCHAR(255) NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    student_id INTEGER NOT NULL
+);
+
+CREATE TABLE students (
     id INTEGER PRIMARY KEY,
     gender VARCHAR(255) NOT NULL,
     nationality VARCHAR(255) NOT NULL,
     credit_transfer_id INTEGER,
-    FOREIGN KEY (id) REFERENCES user(id),
-    FOREIGN KEY (credit_transfer_id) REFERENCES credit_transfer(id)
+    FOREIGN KEY (id) REFERENCES users(id),
+    FOREIGN KEY (credit_transfer_id) REFERENCES credit_transfers(id)
 );
 
-CREATE TABLE student_cirriculum (
+-- Now, update the foreign key reference in credit_transfers after students table is created
+ALTER TABLE credit_transfers
+ADD FOREIGN KEY (student_id) REFERENCES students(id);
+
+CREATE TABLE curriculums (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE students_curriculums (
     student_id INTEGER NOT NULL,
-    cirriculum_id INTEGER NOT NULL,
+    curriculum_id INTEGER NOT NULL,
     year INTEGER NOT NULL,
-    FOREIGN KEY (student_id) REFERENCES student(id),
-    FOREIGN KEY (cirriculum_id) REFERENCES cirriculum(id),
-    PRIMARY KEY (student_id, cirriculum_id)
+    FOREIGN KEY (student_id) REFERENCES students(id),
+    FOREIGN KEY (curriculum_id) REFERENCES curriculums(id),
+    PRIMARY KEY (student_id, curriculum_id)
 );
 
-CREATE TABLE cirriculum (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL
-);
-
-CREATE TABLE credit_transfer (
-    id SERIAL PRIMARY KEY,
-    university VARCHAR(255) NOT NULL,
-    country VARCHAR(255) NOT NULL
-    start_date DATE NOT NULL,
-    end_date DATE NOT NULL,
-    student_id INTEGER NOT NULL,
-    FOREIGN KEY (student_id) REFERENCES student(id)
-);
-
-CREATE TABLE campus (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL
-);
-
-CREATE TABLE campus_specialty (
+CREATE TABLE campuses_specialties (
     campus_id INTEGER NOT NULL,
     specialty_id INTEGER NOT NULL,
-    FOREIGN KEY (campus_id) REFERENCES campus(id),
-    FOREIGN KEY (specialty_id) REFERENCES specialty(id),
+    FOREIGN KEY (campus_id) REFERENCES campuses(id),
+    FOREIGN KEY (specialty_id) REFERENCES specialties(id),
     PRIMARY KEY (campus_id, specialty_id)
 );
 
-CREATE TABLE specialty (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL
-);
-
-CREATE TABLE student_specialty_per_year (
+CREATE TABLE students_specialties_per_year (
     student_id INTEGER NOT NULL,
     specialty_id INTEGER NOT NULL,
     year INTEGER NOT NULL,
-    FOREIGN KEY (student_id) REFERENCES student(id),
-    FOREIGN KEY (specialty_id) REFERENCES specialty(id),
+    FOREIGN KEY (student_id) REFERENCES students(id),
+    FOREIGN KEY (specialty_id) REFERENCES specialties(id),
     PRIMARY KEY (student_id, specialty_id)
 );
 
-CREATE TABLE meeting_request (
+CREATE TABLE meeting_requests (
     id SERIAL PRIMARY KEY,
     date DATE NOT NULL,
     duration INTEGER NOT NULL,
@@ -103,23 +106,22 @@ CREATE TABLE meeting_request (
     action_id INTEGER,
     student_id INTEGER NOT NULL,
     supervisor_id INTEGER NOT NULL,
-    FOREIGN KEY (action_id) REFERENCES action(id),
-    FOREIGN KEY (student_id) REFERENCES student(id),
-    FOREIGN KEY (supervisor_id) REFERENCES supervisor(id)
+    FOREIGN KEY (student_id) REFERENCES students(id),
+    FOREIGN KEY (supervisor_id) REFERENCES supervisors(id)
 );
 
-CREATE TABLE internship_request (
-    id INTEGER PRIMARY KEY,
-    internship_duration INTEGER NOT NULL,
-    wanted_city VARCHAR(255) NOT NULL,
-    wanted_country VARCHAR(255) NOT NULL,
-    FOREIGN KEY (id) REFERENCES meeting_request(id)
-)
-
-CREATE TABLE action (
+CREATE TABLE actions (
     id SERIAL PRIMARY KEY,
     notes TEXT NOT NULL,
     action_plan TEXT NOT NULL,
     meeting_request_id INTEGER NOT NULL,
-    FOREIGN KEY (meeting_request_id) REFERENCES meeting_request(id)
+    FOREIGN KEY (meeting_request_id) REFERENCES meeting_requests(id)
+);
+
+CREATE TABLE internship_requests (
+    id INTEGER PRIMARY KEY,
+    internship_duration INTEGER NOT NULL,
+    wanted_city VARCHAR(255) NOT NULL,
+    wanted_country VARCHAR(255) NOT NULL,
+    FOREIGN KEY (id) REFERENCES meeting_requests(id)
 );
