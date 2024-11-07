@@ -1,0 +1,44 @@
+package fr.imt_atlantique.frappe.entities;
+
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "actions")
+public class Action {
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "actions_id_gen")
+    @SequenceGenerator(name = "actions_id_gen", sequenceName = "actions_id_seq", allocationSize = 1)
+    @Column(name = "id", nullable = false)
+    private Long id;
+
+    @Column(name = "notes", nullable = false, length = Integer.MAX_VALUE)
+    private String notes;
+
+    @Column(name = "action_plan", nullable = false, length = Integer.MAX_VALUE)
+    private String actionPlan;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+
+    public String getActionPlan() {
+        return actionPlan;
+    }
+
+    public void setActionPlan(String actionPlan) {
+        this.actionPlan = actionPlan;
+    }
+
+}
