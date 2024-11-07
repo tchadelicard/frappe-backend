@@ -3,29 +3,29 @@ package fr.imt_atlantique.frappe.entities;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "students_curriculums")
-public class StudentsCurriculum {
+@Table(name = "students_specialties_per_year")
+public class StudentSpecialtyPerYear {
     @EmbeddedId
-    private StudentsCurriculumId id;
+    private StudentSpecialtyPerYearId id;
 
     @MapsId("studentId")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "student_id", nullable = false)
     private Student student;
 
-    @MapsId("curriculumId")
+    @MapsId("specialtyId")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "curriculum_id", nullable = false)
-    private Curriculum curriculum;
+    @JoinColumn(name = "specialty_id", nullable = false)
+    private Specialty specialty;
 
     @Column(name = "year", nullable = false)
     private Integer year;
 
-    public StudentsCurriculumId getId() {
+    public StudentSpecialtyPerYearId getId() {
         return id;
     }
 
-    public void setId(StudentsCurriculumId id) {
+    public void setId(StudentSpecialtyPerYearId id) {
         this.id = id;
     }
 
@@ -37,12 +37,12 @@ public class StudentsCurriculum {
         this.student = student;
     }
 
-    public Curriculum getCurriculum() {
-        return curriculum;
+    public Specialty getSpecialty() {
+        return specialty;
     }
 
-    public void setCurriculum(Curriculum curriculum) {
-        this.curriculum = curriculum;
+    public void setSpecialty(Specialty specialty) {
+        this.specialty = specialty;
     }
 
     public Integer getYear() {

@@ -4,9 +4,9 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "campuses_specialties")
-public class CampusesSpecialty {
+public class CampusSpecialty {
     @EmbeddedId
-    private CampusesSpecialtyId id;
+    private CampusSpecialtyId id;
 
     @MapsId("campusId")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -18,11 +18,11 @@ public class CampusesSpecialty {
     @JoinColumn(name = "specialty_id", nullable = false)
     private Specialty specialty;
 
-    public CampusesSpecialtyId getId() {
+    public CampusSpecialtyId getId() {
         return id;
     }
 
-    public void setId(CampusesSpecialtyId id) {
+    public void setId(CampusSpecialtyId id) {
         this.id = id;
     }
 

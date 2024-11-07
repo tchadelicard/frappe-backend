@@ -1,6 +1,9 @@
 package fr.imt_atlantique.frappe.entities;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDate;
@@ -24,10 +27,6 @@ public class CreditTransfer {
 
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "student_id", nullable = false)
-    private Student student;
 
     public Integer getId() {
         return id;
@@ -67,14 +66,6 @@ public class CreditTransfer {
 
     public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
-    }
-
-    public Student getStudent() {
-        return student;
-    }
-
-    public void setStudent(Student student) {
-        this.student = student;
     }
 
 }

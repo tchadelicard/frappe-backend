@@ -17,10 +17,6 @@ public class Action {
     @Column(name = "action_plan", nullable = false, length = Integer.MAX_VALUE)
     private String actionPlan;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "meeting_request_id", nullable = false)
-    private MeetingRequest meetingRequest;
-
     public Integer getId() {
         return id;
     }
@@ -43,14 +39,6 @@ public class Action {
 
     public void setActionPlan(String actionPlan) {
         this.actionPlan = actionPlan;
-    }
-
-    public MeetingRequest getMeetingRequest() {
-        return meetingRequest;
-    }
-
-    public void setMeetingRequest(MeetingRequest meetingRequest) {
-        this.meetingRequest = meetingRequest;
     }
 
 }

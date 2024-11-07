@@ -1,16 +1,13 @@
 package fr.imt_atlantique.frappe.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import org.hibernate.annotations.ColumnDefault;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "campuses")
 public class Campus {
     @Id
-    @ColumnDefault("nextval('campuses_id_seq')")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "campuses_id_gen")
+    @SequenceGenerator(name = "campuses_id_gen", sequenceName = "campuses_id_seq", allocationSize = 1)
     @Column(name = "id", nullable = false)
     private Integer id;
 
