@@ -47,7 +47,7 @@ CREATE TABLE credit_transfers (
     university VARCHAR(255) NOT NULL,
     country VARCHAR(255) NOT NULL,
     start_date DATE NOT NULL,
-    end_date DATE NOT NULL,
+    end_date DATE NOT NULL
 );
 
 CREATE TABLE students (
@@ -58,10 +58,6 @@ CREATE TABLE students (
     FOREIGN KEY (id) REFERENCES users(id),
     FOREIGN KEY (credit_transfer_id) REFERENCES credit_transfers(id)
 );
-
--- Now, update the foreign key reference in credit_transfers after students table is created
-ALTER TABLE credit_transfers
-ADD FOREIGN KEY (student_id) REFERENCES students(id);
 
 CREATE TABLE curriculums (
     id SERIAL PRIMARY KEY,
@@ -112,7 +108,7 @@ CREATE TABLE meeting_requests (
 CREATE TABLE actions (
     id SERIAL PRIMARY KEY,
     notes TEXT NOT NULL,
-    action_plan TEXT NOT NULL,
+    action_plan TEXT NOT NULL
 );
 
 CREATE TABLE internship_requests (
