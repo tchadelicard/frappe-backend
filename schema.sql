@@ -35,11 +35,12 @@ CREATE TABLE users (
 );
 
 CREATE TABLE supervisors (
-    supervisor_id BIGINT PRIMARY KEY,
+    supervisor_id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
     meeting_url VARCHAR(255),
     caldav_username VARCHAR(255),
     caldav_password VARCHAR(255),
-    FOREIGN KEY (supervisor_id) REFERENCES users(user_id)
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
 CREATE TABLE credit_transfers (
@@ -51,11 +52,12 @@ CREATE TABLE credit_transfers (
 );
 
 CREATE TABLE students (
-    student_id BIGINT PRIMARY KEY,
+    student_id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
     gender VARCHAR(255) NOT NULL,
     nationality VARCHAR(255) NOT NULL,
     credit_transfer_id INTEGER,
-    FOREIGN KEY (student_id) REFERENCES users(user_id),
+    FOREIGN KEY (user_id) REFERENCES users(user_id),
     FOREIGN KEY (credit_transfer_id) REFERENCES credit_transfers(credit_transfer_id)
 );
 
@@ -112,9 +114,10 @@ CREATE TABLE actions (
 );
 
 CREATE TABLE internship_requests (
-    internship_request_id BIGINT PRIMARY KEY,
+    internship_request_id BIGSERIAL PRIMARY KEY,
+    meeting_request_id BIGINT NOT NULL,
     internship_duration INTEGER NOT NULL,
     wanted_city VARCHAR(255) NOT NULL,
     wanted_country VARCHAR(255) NOT NULL,
-    FOREIGN KEY (internship_request_id) REFERENCES meeting_requests(meeting_request_id)
+    FOREIGN KEY (meeting_request_id) REFERENCES meeting_requests(meeting_request_id)
 );
