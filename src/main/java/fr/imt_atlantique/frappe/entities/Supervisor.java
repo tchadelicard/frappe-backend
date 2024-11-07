@@ -19,7 +19,7 @@ public class Supervisor {
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @ColumnDefault("nextval('supervisors_supervisor_id_seq')")
     @JoinColumn(name = "supervisor_id", nullable = false)
-    private User users;
+    private User user;
 
     @Column(name = "meeting_url")
     private String meetingUrl;
@@ -41,12 +41,12 @@ public class Supervisor {
         this.id = id;
     }
 
-    public User getUsers() {
-        return users;
+    public User getUser() {
+        return user;
     }
 
-    public void setUsers(User users) {
-        this.users = users;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getMeetingUrl() {

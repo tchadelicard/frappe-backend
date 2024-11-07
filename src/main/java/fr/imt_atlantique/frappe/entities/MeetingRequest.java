@@ -42,7 +42,7 @@ public class MeetingRequest {
     @JoinColumn(name = "supervisor_id", nullable = false)
     private Supervisor supervisor;
 
-    @OneToOne(mappedBy = "internshipRequest")
+    @OneToOne(mappedBy = "meetingRequest")
     private InternshipRequest internshipRequest;
 
     public Long getId() {

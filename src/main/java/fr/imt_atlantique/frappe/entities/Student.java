@@ -19,7 +19,7 @@ public class Student {
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @ColumnDefault("nextval('students_student_id_seq')")
     @JoinColumn(name = "student_id", nullable = false)
-    private User users;
+    private User user;
 
     @Column(name = "gender", nullable = false)
     private String gender;
@@ -48,12 +48,12 @@ public class Student {
         this.id = id;
     }
 
-    public User getUsers() {
-        return users;
+    public User getUser() {
+        return user;
     }
 
-    public void setUsers(User users) {
-        this.users = users;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getGender() {

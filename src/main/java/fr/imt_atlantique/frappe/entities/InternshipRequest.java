@@ -16,7 +16,7 @@ public class InternshipRequest {
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @ColumnDefault("nextval('internship_requests_internship_request_id_seq')")
     @JoinColumn(name = "internship_request_id", nullable = false)
-    private MeetingRequest meetingRequests;
+    private MeetingRequest meetingRequest;
 
     @Column(name = "internship_duration", nullable = false)
     private Integer internshipDuration;
@@ -35,12 +35,12 @@ public class InternshipRequest {
         this.id = id;
     }
 
-    public MeetingRequest getMeetingRequests() {
-        return meetingRequests;
+    public MeetingRequest getMeetingRequest() {
+        return meetingRequest;
     }
 
-    public void setMeetingRequests(MeetingRequest meetingRequests) {
-        this.meetingRequests = meetingRequests;
+    public void setMeetingRequest(MeetingRequest meetingRequest) {
+        this.meetingRequest = meetingRequest;
     }
 
     public Integer getInternshipDuration() {

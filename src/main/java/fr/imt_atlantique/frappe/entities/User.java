@@ -33,10 +33,10 @@ public class User {
     @JoinColumn(name = "campus_id", nullable = false)
     private Campus campus;
 
-    @OneToOne(mappedBy = "student")
+    @OneToOne(mappedBy = "user")
     private Student student;
 
-    @OneToOne(mappedBy = "supervisor")
+    @OneToOne(mappedBy = "user")
     private Supervisor supervisor;
 
     public Long getId() {
