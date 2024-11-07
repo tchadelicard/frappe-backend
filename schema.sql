@@ -48,7 +48,6 @@ CREATE TABLE credit_transfers (
     country VARCHAR(255) NOT NULL,
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
-    student_id INTEGER NOT NULL
 );
 
 CREATE TABLE students (
@@ -114,8 +113,6 @@ CREATE TABLE actions (
     id SERIAL PRIMARY KEY,
     notes TEXT NOT NULL,
     action_plan TEXT NOT NULL,
-    meeting_request_id INTEGER NOT NULL,
-    FOREIGN KEY (meeting_request_id) REFERENCES meeting_requests(id)
 );
 
 CREATE TABLE internship_requests (
