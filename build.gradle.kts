@@ -21,10 +21,16 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-	implementation("org.springframework.boot:spring-boot-starter-security")
 	implementation("org.postgresql:postgresql")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+	implementation("org.springframework.boot:spring-boot-starter-security")
+    compileOnly("org.projectlombok:lombok:1.18.30") // Use the latest version
+    annotationProcessor("org.projectlombok:lombok:1.18.30")
+	implementation("org.springframework.boot:spring-boot-starter-web") 
+	implementation("org.springframework.boot:spring-boot-starter-mail")
+	
+// If not already included
 }
 
 tasks.withType<Test> {

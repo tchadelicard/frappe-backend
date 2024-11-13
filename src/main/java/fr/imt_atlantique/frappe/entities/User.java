@@ -2,9 +2,20 @@ package fr.imt_atlantique.frappe.entities;
 
 import jakarta.persistence.*;
 
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;   
+
+import java.util.Collection;
+
+import lombok.AllArgsConstructor;
+
+import fr.imt_atlantique.frappe.entities.Campus;
+
+@AllArgsConstructor
+
 @Entity
 @Table(name = "users")
-public class User {
+public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "users_id_gen")
     @SequenceGenerator(name = "users_id_gen", sequenceName = "users_user_id_seq", allocationSize = 1)
@@ -118,5 +129,37 @@ public class User {
     public void setSupervisor(Supervisor supervisor) {
         this.supervisor = supervisor;
     }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return null;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+
+
+
+
+
+
+
 
 }
