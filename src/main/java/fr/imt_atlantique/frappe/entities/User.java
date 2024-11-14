@@ -8,11 +8,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 
 import lombok.AllArgsConstructor;
-
+import lombok.NoArgsConstructor;
 import fr.imt_atlantique.frappe.entities.Campus;
 
 @AllArgsConstructor
-
+@NoArgsConstructor
 @Entity
 @Table(name = "users")
 public class User implements UserDetails {
@@ -49,6 +49,17 @@ public class User implements UserDetails {
 
     @OneToOne(mappedBy = "user")
     private Supervisor supervisor;
+
+    @Column(name = "active", nullable = false)
+    private boolean active;
+
+    public void setActive(boolean active){
+        this.active = active;
+    }
+
+    public boolean getActive(){
+        return this.active;
+    }
 
     public Long getId() {
         return id;

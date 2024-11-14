@@ -2,8 +2,9 @@ package fr.imt_atlantique.frappe.controllers;
 
 import fr.imt_atlantique.frappe.entities.User;
 import fr.imt_atlantique.frappe.repositories.UserRepository;
-import fr.imt_atlantique.frappe.services.testService;
 import fr.imt_atlantique.frappe.services.UserService;
+
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,8 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 public class UserController {
 
-    @Autowired
-    UserRepository userRepository;
 
     private  UserService userService;
 
@@ -33,5 +32,13 @@ public class UserController {
         log.info("Inscription de l'utilisateur : {}");
         this.userService.addUser(user);
     }
+
+
+    @PostMapping("/activation")
+    public void activation(@RequestBody Map<String,String> activation) {
+        log.info("activation de l'utilisateur ");
+        this.userService.activation(activation);
+    }
+
 
 }
