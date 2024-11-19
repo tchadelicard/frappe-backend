@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: frappe
+  datasource:
+    url: 'jdbc:postgresql://localhost:5432/frappe'
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: none
+server:
+  servlet:
+    context-path: /api/v1
