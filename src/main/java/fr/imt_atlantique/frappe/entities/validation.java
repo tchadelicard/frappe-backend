@@ -24,7 +24,7 @@ public class validation {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "validation_id_gen")
     private int id;
-
+    
     private Instant creation;
     private Instant expire;
     private Instant activation;

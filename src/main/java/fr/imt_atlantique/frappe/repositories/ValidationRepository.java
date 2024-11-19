@@ -9,6 +9,5 @@ import java.util.Optional;
 
 public interface ValidationRepository extends CrudRepository<validation, Integer> {
     
-
     Optional<validation>  findByToken(String token);
 }
