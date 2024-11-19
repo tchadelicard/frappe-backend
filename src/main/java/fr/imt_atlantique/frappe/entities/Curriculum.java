@@ -1,10 +1,14 @@
 package fr.imt_atlantique.frappe.entities;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "curriculums")
 public class Curriculum {
@@ -19,29 +23,5 @@ public class Curriculum {
 
     @OneToMany(mappedBy = "curriculum")
     private Set<StudentCurriculum> studentCurriculums = new LinkedHashSet<>();
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Set<StudentCurriculum> getStudentsCurriculums() {
-        return studentCurriculums;
-    }
-
-    public void setStudentsCurriculums(Set<StudentCurriculum> studentCurriculums) {
-        this.studentCurriculums = studentCurriculums;
-    }
 
 }

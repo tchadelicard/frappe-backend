@@ -1,7 +1,11 @@
 package fr.imt_atlantique.frappe.entities;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "students_specialties_per_year")
 public class StudentSpecialtyPerYear {
@@ -21,37 +25,5 @@ public class StudentSpecialtyPerYear {
 
     @Column(name = "year", nullable = false)
     private Integer year;
-
-    public StudentSpecialtyPerYearId getId() {
-        return id;
-    }
-
-    public void setId(StudentSpecialtyPerYearId id) {
-        this.id = id;
-    }
-
-    public Student getStudent() {
-        return student;
-    }
-
-    public void setStudent(Student student) {
-        this.student = student;
-    }
-
-    public Specialty getSpecialty() {
-        return specialty;
-    }
-
-    public void setSpecialty(Specialty specialty) {
-        this.specialty = specialty;
-    }
-
-    public Integer getYear() {
-        return year;
-    }
-
-    public void setYear(Integer year) {
-        this.year = year;
-    }
 
 }

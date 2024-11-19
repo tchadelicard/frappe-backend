@@ -1,11 +1,15 @@
 package fr.imt_atlantique.frappe.entities;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "supervisors")
 public class Supervisor {
@@ -32,53 +36,5 @@ public class Supervisor {
 
     @OneToMany(mappedBy = "supervisor")
     private Set<MeetingRequest> meetingRequests = new LinkedHashSet<>();
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public String getMeetingUrl() {
-        return meetingUrl;
-    }
-
-    public void setMeetingUrl(String meetingUrl) {
-        this.meetingUrl = meetingUrl;
-    }
-
-    public String getCaldavUsername() {
-        return caldavUsername;
-    }
-
-    public void setCaldavUsername(String caldavUsername) {
-        this.caldavUsername = caldavUsername;
-    }
-
-    public String getCaldavPassword() {
-        return caldavPassword;
-    }
-
-    public void setCaldavPassword(String caldavPassword) {
-        this.caldavPassword = caldavPassword;
-    }
-
-    public Set<MeetingRequest> getMeetingRequests() {
-        return meetingRequests;
-    }
-
-    public void setMeetingRequests(Set<MeetingRequest> meetingRequests) {
-        this.meetingRequests = meetingRequests;
-    }
 
 }
