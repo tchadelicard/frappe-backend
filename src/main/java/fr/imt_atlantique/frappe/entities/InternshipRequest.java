@@ -1,8 +1,12 @@
 package fr.imt_atlantique.frappe.entities;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "internship_requests")
 public class InternshipRequest {
@@ -26,45 +30,5 @@ public class InternshipRequest {
 
     @Column(name = "wanted_country", nullable = false)
     private String wantedCountry;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public MeetingRequest getMeetingRequest() {
-        return meetingRequest;
-    }
-
-    public void setMeetingRequest(MeetingRequest meetingRequest) {
-        this.meetingRequest = meetingRequest;
-    }
-
-    public Integer getInternshipDuration() {
-        return internshipDuration;
-    }
-
-    public void setInternshipDuration(Integer internshipDuration) {
-        this.internshipDuration = internshipDuration;
-    }
-
-    public String getWantedCity() {
-        return wantedCity;
-    }
-
-    public void setWantedCity(String wantedCity) {
-        this.wantedCity = wantedCity;
-    }
-
-    public String getWantedCountry() {
-        return wantedCountry;
-    }
-
-    public void setWantedCountry(String wantedCountry) {
-        this.wantedCountry = wantedCountry;
-    }
 
 }

@@ -1,13 +1,19 @@
 spring:
   application:
     name: frappe
+  config:
+    import: "optional:file:.env[.properties]"
   datasource:
-    url: 'jdbc:postgresql://localhost:5432/frappe'
-    username: postgres
-    password: postgres
+    url: ${FRAPPE_DB_URL}
+    username: ${FRAPPE_DB_USERNAME}
+    password: ${FRAPPE_DB_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: none
 server:
   servlet:
     context-path: /api/v1
+security:
+  jwt:
+    secret-key: ${FRAPPE_JWT_SECRET_KEY}
+    expiration-time: 3600000 # 1 hour
