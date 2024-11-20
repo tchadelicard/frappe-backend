@@ -9,11 +9,15 @@ spring:
     password: ${FRAPPE_DB_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
+  mail:
+    host: ${FRAPPE_MAIL_HOST}
+    port: ${FRAPPE_MAIL_PORT}
 server:
   servlet:
     context-path: /api/v1
-security:
-  jwt:
-    secret-key: ${FRAPPE_JWT_SECRET_KEY}
-    expiration-time: 3600000 # 1 hour
+frappe:
+  security:
+    jwt:
+      secret-key: ${FRAPPE_JWT_SECRET_KEY}
+      expiration-time: 3600000 # 1 hour
