@@ -7,15 +7,15 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "students_specialties_per_year")
-public class StudentSpecialtyPerYear {
+@Table(name = "campuses_specialties")
+public class CampusSpecialty {
     @EmbeddedId
-    private StudentSpecialtyPerYearId id;
+    private CampusSpecialtyId id;
 
-    @MapsId("studentId")
+    @MapsId("campusId")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "student_id", nullable = false)
-    private Student student;
+    @JoinColumn(name = "campus_id", nullable = false)
+    private Campus campus;
 
     @MapsId("specialtyId")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
