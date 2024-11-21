@@ -1,6 +1,5 @@
 package fr.imt_atlantique.frappe.filters;
 
-import fr.imt_atlantique.frappe.entities.User;
 import fr.imt_atlantique.frappe.services.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

@@ -7,8 +7,8 @@ import lombok.Setter;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-@Setter
 @Getter
+@Setter
 @Entity
 @Table(name = "specialties")
 public class Specialty {
@@ -25,6 +25,6 @@ public class Specialty {
     private Set<Campus> campuses = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "specialty")
-    private Set<StudentSpecialtyPerYear> studentsSpecialtiesPerYears = new LinkedHashSet<>();
+    private Set<StudentSpecialtyPerYear> studentSpecialtyPerYears = new LinkedHashSet<>();
 
 }

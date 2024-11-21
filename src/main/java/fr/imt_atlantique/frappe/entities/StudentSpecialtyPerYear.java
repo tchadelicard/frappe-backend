@@ -22,4 +22,7 @@ public class StudentSpecialtyPerYear {
     @JoinColumn(name = "specialty_id", nullable = false)
     private Specialty specialty;
 
+    @Column(name = "year", nullable = false)
+    private Integer year;
+
 }

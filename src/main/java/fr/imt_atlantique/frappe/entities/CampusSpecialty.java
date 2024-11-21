@@ -9,6 +9,7 @@ import lombok.Setter;
 @Entity
 @Table(name = "campuses_specialties")
 public class CampusSpecialty {
+    @SequenceGenerator(name = "campuses_specialties_id_gen", sequenceName = "campuses_campus_id_seq", allocationSize = 1)
     @EmbeddedId
     private CampusSpecialtyId id;
 

@@ -28,12 +28,15 @@ CREATE TABLE specialties (
 -- Create users table
 CREATE TABLE users (
     user_id BIGSERIAL PRIMARY KEY,
-    username VARCHAR(255) NOT NULL,
+    username VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     first_name VARCHAR(255) NOT NULL,
     last_name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE, -- Modification: Added unique constraint
-    phone_number VARCHAR(255) NOT NULL,
+    phone_number VARCHAR(255) NOT NULL UNIQUE,
+    enabled BOOLEAN NOT NULL,
+    validation_code VARCHAR(255),
+    validation_code_expiry TIMESTAMP,
     campus_id INTEGER NOT NULL,
     FOREIGN KEY (campus_id) REFERENCES campuses(campus_id)
 );
@@ -72,14 +75,14 @@ CREATE TABLE curriculums (
     name VARCHAR(255) NOT NULL
 );
 
--- Create students_curriculums table
+-- Students Curriculums Table
 CREATE TABLE students_curriculums (
     student_id BIGINT NOT NULL,
     curriculum_id BIGINT NOT NULL,
     year INTEGER NOT NULL,
     FOREIGN KEY (student_id) REFERENCES students(student_id),
     FOREIGN KEY (curriculum_id) REFERENCES curriculums(curriculum_id),
-    PRIMARY KEY (student_id, curriculum_id, year) -- Modification: Added "year" to the composite primary key
+    PRIMARY KEY (student_id, curriculum_id, year)
 );
 
 -- Create campuses_specialties table
@@ -91,14 +94,14 @@ CREATE TABLE campuses_specialties (
     PRIMARY KEY (campus_id, specialty_id)
 );
 
--- Create students_specialties_per_year table
+-- Students Specialties Per Year Table
 CREATE TABLE students_specialties_per_year (
     student_id BIGINT NOT NULL,
     specialty_id BIGINT NOT NULL,
     year INTEGER NOT NULL,
     FOREIGN KEY (student_id) REFERENCES students(student_id),
     FOREIGN KEY (specialty_id) REFERENCES specialties(specialty_id),
-    PRIMARY KEY (student_id, specialty_id, year) -- Modification: Added "year" to the composite primary key
+    PRIMARY KEY (student_id, specialty_id)
 );
 
 -- Create actions table
@@ -120,16 +123,16 @@ CREATE TABLE meeting_requests (
     action_id BIGINT,
     student_id BIGINT NOT NULL,
     supervisor_id BIGINT NOT NULL,
-    FOREIGN KEY (action_id) REFERENCES actions(id), -- Modification: Added foreign key to actions table
+    FOREIGN KEY (action_id) REFERENCES actions(id),
     FOREIGN KEY (student_id) REFERENCES students(student_id),
     FOREIGN KEY (supervisor_id) REFERENCES supervisors(supervisor_id)
 );
 
 -- Create internship_requests table
 CREATE TABLE internship_requests (
-    internship_request_id BIGINT PRIMARY KEY, -- Modification: Changed from BIGSERIAL to BIGINT
+    internship_request_id BIGINT PRIMARY KEY,
     internship_duration INTEGER NOT NULL,
     wanted_city VARCHAR(255) NOT NULL,
     wanted_country VARCHAR(255) NOT NULL,
-    FOREIGN KEY (internship_request_id) REFERENCES meeting_requests(meeting_request_id) -- Modification: Matches primary key to meeting_requests.meeting_request_id
+    FOREIGN KEY (internship_request_id) REFERENCES meeting_requests(meeting_request_id)
 );

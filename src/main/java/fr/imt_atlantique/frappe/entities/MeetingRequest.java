@@ -6,8 +6,8 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 
-@Setter
 @Getter
+@Setter
 @Entity
 @Table(name = "meeting_requests")
 public class MeetingRequest {
@@ -35,8 +35,9 @@ public class MeetingRequest {
     @Column(name = "status", nullable = false)
     private String status;
 
-    @Column(name = "action_id")
-    private Long actionId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "action_id")
+    private Action action;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "student_id", nullable = false)
@@ -46,7 +47,7 @@ public class MeetingRequest {
     @JoinColumn(name = "supervisor_id", nullable = false)
     private Supervisor supervisor;
 
-    @OneToOne(mappedBy = "meetingRequest")
+    @OneToOne
     private InternshipRequest internshipRequest;
 
 }
