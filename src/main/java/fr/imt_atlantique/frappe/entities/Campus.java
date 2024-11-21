@@ -7,8 +7,8 @@ import lombok.Setter;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-@Setter
 @Getter
+@Setter
 @Entity
 @Table(name = "campuses")
 public class Campus {

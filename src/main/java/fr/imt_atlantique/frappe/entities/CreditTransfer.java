@@ -8,8 +8,8 @@ import java.time.LocalDate;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-@Setter
 @Getter
+@Setter
 @Entity
 @Table(name = "credit_transfers")
 public class CreditTransfer {

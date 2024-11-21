@@ -6,15 +6,18 @@ import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
-@Setter
 @Getter
+@Setter
 @Entity
-@Table(name = "users")
+@Table(name = "users", uniqueConstraints = {
+        @UniqueConstraint(name = "users_username_key", columnNames = {"username"}),
+        @UniqueConstraint(name = "users_email_key", columnNames = {"email"}),
+        @UniqueConstraint(name = "users_phone_number_key", columnNames = {"phone_number"})
+})
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "users_id_gen")
@@ -41,22 +44,22 @@ public class User implements UserDetails {
     private String phoneNumber;
 
     @Column(name = "enabled", nullable = false)
-    private boolean enabled = false;
+    private Boolean enabled = false;
 
-    @Column(name = "validation_code", unique = true)
+    @Column(name = "validation_code")
     private String validationCode;
 
     @Column(name = "validation_code_expiry")
-    private LocalDateTime validationCodeExpiry;
+    private Instant validationCodeExpiry;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "campus_id", nullable = false)
     private Campus campus;
 
-    @OneToOne(mappedBy = "user")
+    @OneToOne
     private Student student;
 
-    @OneToOne(mappedBy = "user")
+    @OneToOne
     private Supervisor supervisor;
 
     public boolean isStudent() {
@@ -64,37 +67,31 @@ public class User implements UserDetails {
     }
 
     public boolean isSupervisor() {
-        return supervisor != null && student == null;
+        return student == null && supervisor != null;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public String getUsername() {
-        return email;
+        return List.of();
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return true;
+        return UserDetails.super.isAccountNonExpired();
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return UserDetails.super.isAccountNonLocked();
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true;
+        return UserDetails.super.isCredentialsNonExpired();
     }
 
     @Override
     public boolean isEnabled() {
-        return enabled;
+        return UserDetails.super.isEnabled();
     }
-
 }

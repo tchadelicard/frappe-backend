@@ -13,7 +13,7 @@ import java.util.Objects;
 @Setter
 @Embeddable
 public class CampusSpecialtyId implements Serializable {
-    private static final long serialVersionUID = -7940603248016299120L;
+    private static final long serialVersionUID = 3211300009633235430L;
     @Column(name = "campus_id", nullable = false)
     private Long campusId;
 
