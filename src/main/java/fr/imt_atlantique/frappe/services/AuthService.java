@@ -1,7 +1,7 @@
 package fr.imt_atlantique.frappe.services;
 
 import fr.imt_atlantique.frappe.dtos.*;
-import fr.imt_atlantique.frappe.entities.CampusRepository;
+import fr.imt_atlantique.frappe.repositories.CampusRepository;
 import fr.imt_atlantique.frappe.entities.User;
 import fr.imt_atlantique.frappe.repositories.UserRepository;
 import jakarta.mail.MessagingException;
