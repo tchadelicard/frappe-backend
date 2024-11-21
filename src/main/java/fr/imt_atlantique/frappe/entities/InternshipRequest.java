@@ -9,6 +9,7 @@ import lombok.Setter;
 @Entity
 @Table(name = "internship_requests")
 public class InternshipRequest {
+
     @Id
     @Column(name = "internship_request_id", nullable = false)
     private Long id;
@@ -16,7 +17,7 @@ public class InternshipRequest {
     @MapsId
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "internship_request_id", nullable = false)
-    private MeetingRequest meetingRequests;
+    private MeetingRequest meetingRequest;
 
     @Column(name = "internship_duration", nullable = false)
     private Integer internshipDuration;
@@ -26,5 +27,4 @@ public class InternshipRequest {
 
     @Column(name = "wanted_country", nullable = false)
     private String wantedCountry;
-
 }
