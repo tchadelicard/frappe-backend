@@ -32,7 +32,7 @@ services:
       - postgres
 
   maildev:
-    image: djfarrelly/maildev
+    image: maildev/maildev
     container_name: maildev
     ports:
       - 1080:1080
