@@ -12,6 +12,7 @@ import java.util.Set;
 @Entity
 @Table(name = "students")
 public class Student {
+
     @Id
     @Column(name = "student_id", nullable = false)
     private Long id;
@@ -31,13 +32,12 @@ public class Student {
     @JoinColumn(name = "credit_transfer_id")
     private CreditTransfer creditTransfer;
 
-    @OneToMany(mappedBy = "student")
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<MeetingRequest> meetingRequests = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "student")
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<StudentCurriculum> studentCurriculums = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "student")
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<StudentSpecialtyPerYear> studentSpecialtyPerYears = new LinkedHashSet<>();
-
 }

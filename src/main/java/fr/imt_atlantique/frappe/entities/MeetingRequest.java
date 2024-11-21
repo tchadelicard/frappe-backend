@@ -11,9 +11,9 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "meeting_requests")
 public class MeetingRequest {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "meeting_requests_id_gen")
-    @SequenceGenerator(name = "meeting_requests_id_gen", sequenceName = "meeting_requests_meeting_request_id_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "meeting_request_id", nullable = false)
     private Long id;
 
@@ -29,7 +29,7 @@ public class MeetingRequest {
     @Column(name = "location", nullable = false)
     private String location;
 
-    @Column(name = "request_description", nullable = false, length = Integer.MAX_VALUE)
+    @Column(name = "request_description", nullable = false)
     private String requestDescription;
 
     @Column(name = "status", nullable = false)
@@ -46,8 +46,4 @@ public class MeetingRequest {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "supervisor_id", nullable = false)
     private Supervisor supervisor;
-
-    @OneToOne
-    private InternshipRequest internshipRequest;
-
 }
