@@ -1,57 +1,28 @@
 package fr.imt_atlantique.frappe.entities;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "students_curriculums")
 public class StudentCurriculum {
-    @SequenceGenerator(name = "students_curriculums_id_gen", sequenceName = "actions_id_seq", allocationSize = 1)
+
     @EmbeddedId
     private StudentCurriculumId id;
 
-    @MapsId
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("studentId")
     @JoinColumn(name = "student_id", nullable = false)
     private Student student;
 
-    @MapsId
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("curriculumId")
     @JoinColumn(name = "curriculum_id", nullable = false)
     private Curriculum curriculum;
 
-    @Column(name = "year", nullable = false)
+    @Column(name = "year", nullable = false, insertable = false, updatable = false)
     private Integer year;
-
-    public StudentCurriculumId getId() {
-        return id;
-    }
-
-    public void setId(StudentCurriculumId id) {
-        this.id = id;
-    }
-
-    public Student getStudent() {
-        return student;
-    }
-
-    public void setStudent(Student student) {
-        this.student = student;
-    }
-
-    public Curriculum getCurriculum() {
-        return curriculum;
-    }
-
-    public void setCurriculum(Curriculum curriculum) {
-        this.curriculum = curriculum;
-    }
-
-    public Integer getYear() {
-        return year;
-    }
-
-    public void setYear(Integer year) {
-        this.year = year;
-    }
-
 }

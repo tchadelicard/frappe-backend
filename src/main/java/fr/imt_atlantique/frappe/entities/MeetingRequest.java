@@ -1,15 +1,19 @@
 package fr.imt_atlantique.frappe.entities;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "meeting_requests")
 public class MeetingRequest {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "meeting_requests_id_gen")
-    @SequenceGenerator(name = "meeting_requests_id_gen", sequenceName = "meeting_requests_meeting_request_id_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "meeting_request_id", nullable = false)
     private Long id;
 
@@ -25,14 +29,15 @@ public class MeetingRequest {
     @Column(name = "location", nullable = false)
     private String location;
 
-    @Column(name = "request_description", nullable = false, length = Integer.MAX_VALUE)
+    @Column(name = "request_description", nullable = false)
     private String requestDescription;
 
     @Column(name = "status", nullable = false)
     private String status;
 
-    @Column(name = "action_id")
-    private Long actionId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "action_id")
+    private Action action;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "student_id", nullable = false)
@@ -41,96 +46,4 @@ public class MeetingRequest {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "supervisor_id", nullable = false)
     private Supervisor supervisor;
-
-    @OneToOne(mappedBy = "meetingRequest")
-    private InternshipRequest internshipRequest;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
-
-    public Integer getDuration() {
-        return duration;
-    }
-
-    public void setDuration(Integer duration) {
-        this.duration = duration;
-    }
-
-    public String getTheme() {
-        return theme;
-    }
-
-    public void setTheme(String theme) {
-        this.theme = theme;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
-    }
-
-    public String getRequestDescription() {
-        return requestDescription;
-    }
-
-    public void setRequestDescription(String requestDescription) {
-        this.requestDescription = requestDescription;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public Long getActionId() {
-        return actionId;
-    }
-
-    public void setActionId(Long actionId) {
-        this.actionId = actionId;
-    }
-
-    public Student getStudent() {
-        return student;
-    }
-
-    public void setStudent(Student student) {
-        this.student = student;
-    }
-
-    public Supervisor getSupervisor() {
-        return supervisor;
-    }
-
-    public void setSupervisor(Supervisor supervisor) {
-        this.supervisor = supervisor;
-    }
-
-    public InternshipRequest getInternshipRequest() {
-        return internshipRequest;
-    }
-
-    public void setInternshipRequest(InternshipRequest internshipRequest) {
-        this.internshipRequest = internshipRequest;
-    }
-
 }

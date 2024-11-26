@@ -1,7 +1,14 @@
 package fr.imt_atlantique.frappe.entities;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+@Getter
+@Setter
 @Entity
 @Table(name = "actions")
 public class Action {
@@ -17,28 +24,7 @@ public class Action {
     @Column(name = "action_plan", nullable = false, length = Integer.MAX_VALUE)
     private String actionPlan;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getNotes() {
-        return notes;
-    }
-
-    public void setNotes(String notes) {
-        this.notes = notes;
-    }
-
-    public String getActionPlan() {
-        return actionPlan;
-    }
-
-    public void setActionPlan(String actionPlan) {
-        this.actionPlan = actionPlan;
-    }
+    @OneToMany(mappedBy = "action")
+    private Set<MeetingRequest> meetingRequests = new LinkedHashSet<>();
 
 }
