@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: frappe
+  config:
+    import: "optional:file:.env[.properties]"
+  datasource:
+    url: ${FRAPPE_DB_URL}
+    username: ${FRAPPE_DB_USERNAME}
+    password: ${FRAPPE_DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
+  mail:
+    host: ${FRAPPE_MAIL_HOST}
+    port: ${FRAPPE_MAIL_PORT}
+server:
+  servlet:
+    context-path: /api/v1
+frappe:
+  security:
+    jwt:
+      secret-key: ${FRAPPE_JWT_SECRET_KEY}
+      expiration-time: 3600000 # 1 hour

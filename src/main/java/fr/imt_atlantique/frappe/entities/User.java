@@ -1,10 +1,25 @@
 package fr.imt_atlantique.frappe.entities;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.Instant;
+import java.util.Collection;
+import java.util.List;
+
+@Getter
+@Setter
 @Entity
-@Table(name = "users")
-public class User {
+@Table(name = "users", uniqueConstraints = {
+        @UniqueConstraint(name = "users_username_key", columnNames = {"username"}),
+        @UniqueConstraint(name = "users_email_key", columnNames = {"email"}),
+        @UniqueConstraint(name = "users_phone_number_key", columnNames = {"phone_number"})
+})
+public class User implements UserDetails {
+
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "users_id_gen")
     @SequenceGenerator(name = "users_id_gen", sequenceName = "users_user_id_seq", allocationSize = 1)
@@ -29,94 +44,55 @@ public class User {
     @Column(name = "phone_number", nullable = false)
     private String phoneNumber;
 
+    @Column(name = "enabled", nullable = false)
+    private Boolean enabled = false;
+
+    @Column(name = "validation_code")
+    private String validationCode;
+
+    @Column(name = "validation_code_expiry")
+    private Instant validationCodeExpiry;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "campus_id", nullable = false)
     private Campus campus;
 
-    @OneToOne(mappedBy = "user")
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Student student;
 
-    @OneToOne(mappedBy = "user")
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Supervisor supervisor;
 
-    public Long getId() {
-        return id;
+    public boolean isStudent() {
+        return student != null && supervisor == null;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public boolean isSupervisor() {
+        return student == null && supervisor != null;
     }
 
-    public String getUsername() {
-        return username;
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of();
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
     }
 
-    public String getPassword() {
-        return password;
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
     }
 
-    public String getFirstName() {
-        return firstName;
+    @Override
+    public boolean isEnabled() {
+        return this.enabled;
     }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-    public Campus getCampus() {
-        return campus;
-    }
-
-    public void setCampus(Campus campus) {
-        this.campus = campus;
-    }
-
-    public Student getStudent() {
-        return student;
-    }
-
-    public void setStudent(Student student) {
-        this.student = student;
-    }
-
-    public Supervisor getSupervisor() {
-        return supervisor;
-    }
-
-    public void setSupervisor(Supervisor supervisor) {
-        this.supervisor = supervisor;
-    }
-
 }

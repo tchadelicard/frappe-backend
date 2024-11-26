@@ -1,10 +1,14 @@
 package fr.imt_atlantique.frappe.entities;
 
 import jakarta.persistence.Embeddable;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 
 @Embeddable
+@EqualsAndHashCode
 public class StudentCurriculumId implements Serializable {
-    private static final long serialVersionUID = 2673901690620255011L;
+    private Long studentId;
+    private Long curriculumId;
+    private Integer year;
 }

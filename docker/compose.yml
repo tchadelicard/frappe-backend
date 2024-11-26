@@ -31,6 +31,13 @@ services:
     depends_on:
       - postgres
 
+  maildev:
+    image: maildev/maildev
+    container_name: maildev
+    ports:
+      - 1080:1080
+      - 1025:1025
+
 volumes:
   postgres_data:
   pgadmin_data:
