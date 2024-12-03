@@ -135,7 +135,3 @@ CREATE TABLE internship_requests (
     wanted_country VARCHAR(255) NOT NULL,
     FOREIGN KEY (internship_request_id) REFERENCES meeting_requests(meeting_request_id)
 );
-
-INSERT INTO campuses (name) VALUES ('Brest');
-INSERT INTO campuses (name) VALUES ('Rennes');
-INSERT INTO campuses (name) VALUES ('Nantes');
