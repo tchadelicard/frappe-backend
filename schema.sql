@@ -32,7 +32,7 @@ CREATE TABLE users (
     password VARCHAR(255) NOT NULL,
     first_name VARCHAR(255) NOT NULL,
     last_name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL UNIQUE, -- Modification: Added unique constraint
+    email VARCHAR(255) NOT NULL UNIQUE,
     phone_number VARCHAR(255) NOT NULL UNIQUE,
     enabled BOOLEAN NOT NULL,
     validation_code VARCHAR(255),
@@ -43,11 +43,11 @@ CREATE TABLE users (
 
 -- Create supervisors table
 CREATE TABLE supervisors (
-    supervisor_id BIGINT PRIMARY KEY, -- Modification: Changed from BIGSERIAL to BIGINT
+    supervisor_id BIGINT PRIMARY KEY,
     meeting_url VARCHAR(255),
     caldav_username VARCHAR(255),
     caldav_password VARCHAR(255),
-    FOREIGN KEY (supervisor_id) REFERENCES users(user_id) -- Modification: Matches primary key to users.user_id
+    FOREIGN KEY (supervisor_id) REFERENCES users(user_id)
 );
 
 -- Create credit_transfers table
@@ -61,11 +61,11 @@ CREATE TABLE credit_transfers (
 
 -- Create students table
 CREATE TABLE students (
-    student_id BIGINT PRIMARY KEY, -- Modification: Changed from BIGSERIAL to BIGINT
+    student_id BIGINT PRIMARY KEY,
     gender VARCHAR(255) NOT NULL,
     nationality VARCHAR(255) NOT NULL,
     credit_transfer_id BIGINT,
-    FOREIGN KEY (student_id) REFERENCES users(user_id), -- Modification: Matches primary key to users.user_id
+    FOREIGN KEY (student_id) REFERENCES users(user_id),
     FOREIGN KEY (credit_transfer_id) REFERENCES credit_transfers(credit_transfer_id)
 );
 
@@ -79,10 +79,9 @@ CREATE TABLE curriculums (
 CREATE TABLE students_curriculums (
     student_id BIGINT NOT NULL,
     curriculum_id BIGINT NOT NULL,
-    year INTEGER NOT NULL,
     FOREIGN KEY (student_id) REFERENCES students(student_id),
     FOREIGN KEY (curriculum_id) REFERENCES curriculums(curriculum_id),
-    PRIMARY KEY (student_id, curriculum_id, year)
+    PRIMARY KEY (student_id, curriculum_id)
 );
 
 -- Create campuses_specialties table

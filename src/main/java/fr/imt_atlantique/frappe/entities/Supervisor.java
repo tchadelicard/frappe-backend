@@ -12,7 +12,6 @@ import java.util.Set;
 @Entity
 @Table(name = "supervisors")
 public class Supervisor {
-
     @Id
     @Column(name = "supervisor_id", nullable = false)
     private Long id;
@@ -31,6 +30,7 @@ public class Supervisor {
     @Column(name = "caldav_password")
     private String caldavPassword;
 
-    @OneToMany(mappedBy = "supervisor", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "supervisor")
     private Set<MeetingRequest> meetingRequests = new LinkedHashSet<>();
+
 }
