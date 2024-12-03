@@ -25,6 +25,6 @@ public class Specialty {
     private Set<Campus> campuses = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "specialty")
-    private Set<StudentSpecialtyPerYear> studentSpecialtyPerYears = new LinkedHashSet<>();
+    private Set<StudentSpecialtyPerYear> studentsSpecialtiesPerYears = new LinkedHashSet<>();
 
 }
