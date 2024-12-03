@@ -5,15 +5,17 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "credit_transfers")
 public class CreditTransfer {
-
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "credit_transfers_id_gen")
+    @SequenceGenerator(name = "credit_transfers_id_gen", sequenceName = "credit_transfers_credit_transfer_id_seq", allocationSize = 1)
     @Column(name = "credit_transfer_id", nullable = false)
     private Long id;
 
@@ -28,4 +30,8 @@ public class CreditTransfer {
 
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
+
+    @OneToMany(mappedBy = "creditTransfer")
+    private Set<Student> students = new LinkedHashSet<>();
+
 }

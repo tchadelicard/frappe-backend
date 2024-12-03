@@ -21,7 +21,10 @@ public class Curriculum {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @OneToMany(mappedBy = "curriculum")
-    private Set<StudentCurriculum> studentCurriculums = new LinkedHashSet<>();
+    @ManyToMany
+    @JoinTable(name = "students_curriculums",
+            joinColumns = @JoinColumn(name = "curriculum_id"),
+            inverseJoinColumns = @JoinColumn(name = "student_id"))
+    private Set<Student> students = new LinkedHashSet<>();
 
 }
