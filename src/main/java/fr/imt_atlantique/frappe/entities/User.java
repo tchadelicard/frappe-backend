@@ -42,7 +42,7 @@ public class User implements UserDetails {
     @Column(name = "email", nullable = false)
     private String email;
 
-    @Column(name = "phone_number", nullable = false)
+    @Column(name = "phone_number")
     private String phoneNumber;
 
     @Column(name = "enabled", nullable = false)
@@ -55,7 +55,7 @@ public class User implements UserDetails {
     private Instant validationCodeExpiry;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "campus_id", nullable = false)
+    @JoinColumn(name = "campus_id")
     private Campus campus;
 
     @Override
