@@ -33,11 +33,11 @@ CREATE TABLE users (
     first_name VARCHAR(255) NOT NULL,
     last_name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
-    phone_number VARCHAR(255) NOT NULL UNIQUE,
+    phone_number VARCHAR(255) UNIQUE,
     enabled BOOLEAN NOT NULL,
     validation_code VARCHAR(255),
     validation_code_expiry TIMESTAMP,
-    campus_id INTEGER NOT NULL,
+    campus_id INTEGER,
     FOREIGN KEY (campus_id) REFERENCES campuses(campus_id)
 );
 
@@ -62,8 +62,8 @@ CREATE TABLE credit_transfers (
 -- Create students table
 CREATE TABLE students (
     student_id BIGINT PRIMARY KEY,
-    gender VARCHAR(255) NOT NULL,
-    nationality VARCHAR(255) NOT NULL,
+    gender VARCHAR(255),
+    nationality VARCHAR(255),
     credit_transfer_id BIGINT,
     FOREIGN KEY (student_id) REFERENCES users(user_id),
     FOREIGN KEY (credit_transfer_id) REFERENCES credit_transfers(credit_transfer_id)
