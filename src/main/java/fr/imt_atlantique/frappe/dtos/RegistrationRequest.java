@@ -11,6 +11,4 @@ public class RegistrationRequest {
     private String email;
     private String firstName;
     private String lastName;
-    private String phoneNumber;
-    private Long campusId;
 }
