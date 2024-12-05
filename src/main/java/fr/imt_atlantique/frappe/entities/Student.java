@@ -13,10 +13,10 @@ import java.util.Set;
 @Table(name = "students")
 @PrimaryKeyJoinColumn(name = "student_id")
 public class Student extends User {
-    @Column(name = "gender", nullable = false)
+    @Column(name = "gender")
     private String gender;
 
-    @Column(name = "nationality", nullable = false)
+    @Column(name = "nationality")
     private String nationality;
 
     @ManyToOne(fetch = FetchType.LAZY)
