@@ -11,16 +11,8 @@ import java.util.Set;
 @Setter
 @Entity
 @Table(name = "supervisors")
-public class Supervisor {
-    @Id
-    @Column(name = "supervisor_id", nullable = false)
-    private Long id;
-
-    @MapsId
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "supervisor_id", nullable = false)
-    private User user;
-
+@PrimaryKeyJoinColumn(name = "supervisor_id")
+public class Supervisor extends User {
     @Column(name = "meeting_url")
     private String meetingUrl;
 
