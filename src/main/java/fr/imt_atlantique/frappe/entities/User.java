@@ -18,6 +18,7 @@ import java.util.List;
         @UniqueConstraint(name = "users_email_key", columnNames = {"email"}),
         @UniqueConstraint(name = "users_phone_number_key", columnNames = {"phone_number"})
 })
+@Inheritance(strategy = InheritanceType.JOINED)
 public class User implements UserDetails {
 
     @Id
@@ -41,7 +42,7 @@ public class User implements UserDetails {
     @Column(name = "email", nullable = false)
     private String email;
 
-    @Column(name = "phone_number", nullable = false)
+    @Column(name = "phone_number")
     private String phoneNumber;
 
     @Column(name = "enabled", nullable = false)
@@ -54,22 +55,8 @@ public class User implements UserDetails {
     private Instant validationCodeExpiry;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "campus_id", nullable = false)
+    @JoinColumn(name = "campus_id")
     private Campus campus;
-
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Student student;
-
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Supervisor supervisor;
-
-    public boolean isStudent() {
-        return student != null && supervisor == null;
-    }
-
-    public boolean isSupervisor() {
-        return student == null && supervisor != null;
-    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

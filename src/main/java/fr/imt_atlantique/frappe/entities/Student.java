@@ -11,20 +11,12 @@ import java.util.Set;
 @Setter
 @Entity
 @Table(name = "students")
-public class Student {
-    @Id
-    @Column(name = "student_id", nullable = false)
-    private Long id;
-
-    @MapsId
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "student_id", nullable = false)
-    private User user;
-
-    @Column(name = "gender", nullable = false)
+@PrimaryKeyJoinColumn(name = "student_id")
+public class Student extends User {
+    @Column(name = "gender")
     private String gender;
 
-    @Column(name = "nationality", nullable = false)
+    @Column(name = "nationality")
     private String nationality;
 
     @ManyToOne(fetch = FetchType.LAZY)
