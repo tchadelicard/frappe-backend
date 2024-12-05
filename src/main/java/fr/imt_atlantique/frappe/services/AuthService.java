@@ -1,7 +1,8 @@
 package fr.imt_atlantique.frappe.services;
 
 import fr.imt_atlantique.frappe.dtos.*;
-import fr.imt_atlantique.frappe.repositories.CampusRepository;
+import fr.imt_atlantique.frappe.entities.Student;
+import fr.imt_atlantique.frappe.repositories.StudentRepository;
 import fr.imt_atlantique.frappe.entities.User;
 import fr.imt_atlantique.frappe.repositories.UserRepository;
 import jakarta.mail.MessagingException;
@@ -25,15 +26,15 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JavaMailSender mailSender;
     private final JwtService jwtService;
-    private final CampusRepository campusRepository;
+    private final StudentRepository studentRepository;
 
     public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JavaMailSender mailSender, JwtService jwtService,
-                       CampusRepository campusRepository) {
+                       StudentRepository studentRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.mailSender = mailSender;
         this.jwtService = jwtService;
-        this.campusRepository = campusRepository;
+        this.studentRepository = studentRepository;
     }
 
     @Transactional
@@ -46,11 +47,11 @@ public class AuthService {
                     .build();
         }
 
-        User user = createUser(request);
-        userRepository.save(user);
+        Student student = createStudent(request);
+        studentRepository.save(student);
 
         try {
-            sendVerificationEmail(user);
+            sendVerificationEmail(student);
         } catch (MessagingException e) {
             return RegistrationResponse.builder()
                     .success(false)
@@ -121,34 +122,26 @@ public class AuthService {
         if (!isValidPassword(request.getPassword())) {
             return "Password must be at least 8 characters, include an uppercase letter, a lowercase letter, a number, and a special character.";
         }
-        if (!isValidPhoneNumber(request.getPhoneNumber())) {
-            return "Invalid phone number format.";
-        }
         if (userRepository.existsByEmail(request.getEmail())) {
             return "Email is already taken.";
         }
         if (userRepository.existsByUsername(request.getUsername())) {
             return "Username is already taken.";
         }
-        if (!campusRepository.existsById(request.getCampusId())) {
-            return "Invalid campus ID.";
-        }
         return null;
     }
 
-    private User createUser(RegistrationRequest request) {
-        User user = new User();
-        user.setUsername(request.getUsername());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setFirstName(request.getFirstName());
-        user.setLastName(request.getLastName());
-        user.setEmail(request.getEmail());
-        user.setPhoneNumber(request.getPhoneNumber());
-        user.setEnabled(false);
-        user.setValidationCode(UUID.randomUUID().toString());
-        user.setValidationCodeExpiry(Instant.now().plus(Duration.ofHours(1)));
-        user.setCampus(campusRepository.findById(request.getCampusId()).orElseThrow());
-        return user;
+    private Student createStudent(RegistrationRequest request) {
+        Student student = new Student();
+        student.setUsername(request.getUsername());
+        student.setPassword(passwordEncoder.encode(request.getPassword()));
+        student.setFirstName(request.getFirstName());
+        student.setLastName(request.getLastName());
+        student.setEmail(request.getEmail());
+        student.setEnabled(false);
+        student.setValidationCode(UUID.randomUUID().toString());
+        student.setValidationCodeExpiry(Instant.now().plus(Duration.ofHours(1)));
+        return student;
     }
 
     private void enableUserAccount(User user) {
