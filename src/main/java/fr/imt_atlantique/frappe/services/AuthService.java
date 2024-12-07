@@ -151,6 +151,27 @@ public class AuthService {
                 .message("Verification code sent successfully.")
                 .build();
     }
+    
+    @Transactional
+    public ChangePasswordResponse changePassword(ChangePasswordRequest request) {
+        Optional<User> userOptional = userRepository.findByEmail(request.getEmail());
+        if (userOptional.isEmpty() || !passwordEncoder.matches(request.getPassword(), userOptional.get().getPassword())) {
+            return ChangePasswordResponse.builder()
+                    .success(false)
+                    .message("Invalid email or password.")
+                    .build();
+        }
+
+        User user = userOptional.get();
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+
+        return ChangePasswordResponse.builder()
+                .success(true)
+                .message("Password changed successfully.")
+                .build();
+    }
+    
 
     private String validateRegistrationRequest(RegistrationRequest request) {
         if (!isValidEmail(request.getEmail())) {

@@ -59,6 +59,14 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
     
+    @PostMapping("/change-password")
+    public ResponseEntity<ChangePasswordResponse> changePassword(@RequestBody ChangePasswordRequest request) {
+        ChangePasswordResponse response = authService.changePassword(request);
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
 
  
     
