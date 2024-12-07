@@ -2,10 +2,16 @@ package fr.imt_atlantique.frappe.controllers;
 
 import fr.imt_atlantique.frappe.dtos.*;
 import fr.imt_atlantique.frappe.services.AuthService;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
+
+@Slf4j
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -18,6 +24,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<RegistrationResponse> register(@RequestBody RegistrationRequest request) {
+        log.info("Received registration request: {}");
         RegistrationResponse response = authService.register(request);
         if (response.isSuccess()) {
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -42,4 +49,17 @@ public class AuthController {
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
+
+    @PostMapping("/resend")
+    public ResponseEntity<ResendResponce> resendVerificationCode(@RequestBody ResendRequest request) {
+        ResendResponce response = authService.resendVerificationCode(request.getEmail());
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+    
+
+ 
+    
 }

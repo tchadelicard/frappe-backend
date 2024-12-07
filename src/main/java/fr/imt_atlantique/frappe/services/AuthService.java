@@ -115,6 +115,43 @@ public class AuthService {
                 .build();
     }
 
+    @Transactional
+    public ResendResponce resendVerificationCode(String email) {
+        Optional<User> userOptional = userRepository.findByEmail(email);
+        if (userOptional.isEmpty()) {
+            return ResendResponce.builder()
+                    .success(false)
+                    .message("User not found.")
+                    .build();
+        }
+
+        User user = userOptional.get();
+        if (user.isEnabled()) {
+            return ResendResponce.builder()
+                    .success(false)
+                    .message("Account is already verified.")
+                    .build();
+        }
+
+        user.setValidationCode(UUID.randomUUID().toString());
+        user.setValidationCodeExpiry(Instant.now().plus(Duration.ofMinutes(10)));
+        userRepository.save(user);
+
+        try {
+            sendVerificationEmail(user);
+        } catch (MessagingException e) {
+            return ResendResponce.builder()
+                    .success(false)
+                    .message("Error sending verification email.")
+                    .build();
+        }
+
+        return ResendResponce.builder()
+                .success(true)
+                .message("Verification code sent successfully.")
+                .build();
+    }
+
     private String validateRegistrationRequest(RegistrationRequest request) {
         if (!isValidEmail(request.getEmail())) {
             return "Invalid email format.";
@@ -123,10 +160,20 @@ public class AuthService {
             return "Password must be at least 8 characters, include an uppercase letter, a lowercase letter, a number, and a special character.";
         }
         if (userRepository.existsByEmail(request.getEmail())) {
-            return "Email is already taken.";
+            if (userRepository.findByEmail(request.getEmail()).get().isEnabled()) {
+                return "Email is already taken.";
+            }
+            User user = userRepository.findByEmail(request.getEmail())
+            .orElseThrow(() -> new IllegalArgumentException("User not found"));
+            userRepository.delete(user);
         }
         if (userRepository.existsByUsername(request.getUsername())) {
-            return "Username is already taken.";
+            if (userRepository.findByUsername(request.getUsername()).get().isEnabled()) {
+                return "Username is already taken.";
+            }
+            User user = userRepository.findByUsername(request.getUsername())
+            .orElseThrow(() -> new IllegalArgumentException("User not found"));
+            userRepository.delete(user);
         }
         return null;
     }
@@ -140,7 +187,7 @@ public class AuthService {
         student.setEmail(request.getEmail());
         student.setEnabled(false);
         student.setValidationCode(UUID.randomUUID().toString());
-        student.setValidationCodeExpiry(Instant.now().plus(Duration.ofHours(1)));
+        student.setValidationCodeExpiry(Instant.now().plus(Duration.ofMinutes(10)));
         return student;
     }
 
