@@ -53,6 +53,7 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/campuses/**").permitAll()
                         .requestMatchers("/credit-transfers/**").permitAll()
+                        .requestMatchers("/students/me").hasRole("STUDENT")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
@@ -70,8 +71,8 @@ public class SecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return email -> userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+        return username -> userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
     }
 
     @Bean
