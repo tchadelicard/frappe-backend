@@ -181,20 +181,10 @@ public class AuthService {
             return "Password must be at least 8 characters, include an uppercase letter, a lowercase letter, a number, and a special character.";
         }
         if (userRepository.existsByEmail(request.getEmail())) {
-            if (userRepository.findByEmail(request.getEmail()).get().isEnabled()) {
-                return "Email is already taken.";
-            }
-            User user = userRepository.findByEmail(request.getEmail())
-            .orElseThrow(() -> new IllegalArgumentException("User not found"));
-            userRepository.delete(user);
+            return "Email is already taken.";
         }
         if (userRepository.existsByUsername(request.getUsername())) {
-            if (userRepository.findByUsername(request.getUsername()).get().isEnabled()) {
-                return "Username is already taken.";
-            }
-            User user = userRepository.findByUsername(request.getUsername())
-            .orElseThrow(() -> new IllegalArgumentException("User not found"));
-            userRepository.delete(user);
+            return "Username is already taken.";
         }
         return null;
     }
