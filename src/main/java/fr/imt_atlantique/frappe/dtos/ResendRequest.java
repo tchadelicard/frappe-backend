@@ -9,7 +9,6 @@ import lombok.Data;
 @Data
 public class ResendRequest {
     private String email;
-    private String password;
 }
 
 
