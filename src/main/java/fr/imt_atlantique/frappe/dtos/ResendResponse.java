@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class ResendResponce {
+public class ResendResponse {
     private boolean success;
     private String message;
 }
