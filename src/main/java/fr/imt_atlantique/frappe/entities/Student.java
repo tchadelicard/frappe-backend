@@ -3,6 +3,8 @@ package fr.imt_atlantique.frappe.entities;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -32,4 +34,8 @@ public class Student extends User {
     @OneToMany(mappedBy = "student")
     private Set<StudentSpecialtyPerYear> studentsSpecialtiesPerYears = new LinkedHashSet<>();
 
+    @Override
+    public Set<GrantedAuthority> getAuthorities() {
+        return Set.of(new SimpleGrantedAuthority("ROLE_STUDENT"));
+    }
 }

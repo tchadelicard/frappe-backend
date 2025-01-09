@@ -51,8 +51,8 @@ public class AuthController {
     }
 
     @PostMapping("/resend")
-    public ResponseEntity<ResendResponce> resendVerificationCode(@RequestBody ResendRequest request) {
-        ResendResponce response = authService.resendVerificationCode(request.getEmail());
+    public ResponseEntity<ResendResponse> resendVerificationCode(@RequestBody ResendRequest request) {
+        ResendResponse response = authService.resendVerificationCode(request.getEmail());
         if (response.isSuccess()) {
             return ResponseEntity.ok(response);
         }
