@@ -3,6 +3,8 @@ package fr.imt_atlantique.frappe.entities;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -24,5 +26,10 @@ public class Supervisor extends User {
 
     @OneToMany(mappedBy = "supervisor")
     private Set<MeetingRequest> meetingRequests = new LinkedHashSet<>();
+
+    @Override
+    public Set<GrantedAuthority> getAuthorities() {
+        return Set.of(new SimpleGrantedAuthority("ROLE_SUPERVISOR"));
+    }
 
 }

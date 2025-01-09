@@ -116,10 +116,10 @@ public class AuthService {
     }
 
     @Transactional
-    public ResendResponce resendVerificationCode(String email) {
+    public ResendResponse resendVerificationCode(String email) {
         Optional<User> userOptional = userRepository.findByEmail(email);
         if (userOptional.isEmpty()) {
-            return ResendResponce.builder()
+            return ResendResponse.builder()
                     .success(false)
                     .message("User not found.")
                     .build();
@@ -127,7 +127,7 @@ public class AuthService {
 
         User user = userOptional.get();
         if (user.isEnabled()) {
-            return ResendResponce.builder()
+            return ResendResponse.builder()
                     .success(false)
                     .message("Account is already verified.")
                     .build();
@@ -140,13 +140,13 @@ public class AuthService {
         try {
             sendVerificationEmail(user);
         } catch (MessagingException e) {
-            return ResendResponce.builder()
+            return ResendResponse.builder()
                     .success(false)
                     .message("Error sending verification email.")
                     .build();
         }
 
-        return ResendResponce.builder()
+        return ResendResponse.builder()
                 .success(true)
                 .message("Verification code sent successfully.")
                 .build();
