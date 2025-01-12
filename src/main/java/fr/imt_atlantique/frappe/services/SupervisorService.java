@@ -64,6 +64,7 @@ public class SupervisorService {
             supervisor.setCaldavPassword(encryptionResult.getEncryptedData()); // Store encrypted password
             supervisor.setCaldavPasswordSalt(encryptionResult.getSalt());      // Store salt
             supervisor.setCaldavPasswordIv(encryptionResult.getIv());          // Store IV
+            supervisor.setEnabled(true);
 
             supervisorRepository.save(supervisor);
 
