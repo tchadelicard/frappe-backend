@@ -54,6 +54,7 @@ public class SecurityConfig {
                         .requestMatchers("/campuses/**").permitAll()
                         .requestMatchers("/credit-transfers/**").permitAll()
                         .requestMatchers("/supervisors/**").permitAll()
+                        .requestMatchers("/availabilities/**").permitAll()
                         .requestMatchers("/students/me").hasRole("STUDENT")
                         .anyRequest().authenticated()
                 )
