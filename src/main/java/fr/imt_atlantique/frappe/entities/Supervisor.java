@@ -24,6 +24,12 @@ public class Supervisor extends User {
     @Column(name = "caldav_password")
     private String caldavPassword;
 
+    @Column(name = "caldav_password_salt")
+    private String caldavPasswordSalt;
+
+    @Column(name = "caldav_password_iv")
+    private String caldavPasswordIv;
+
     @OneToMany(mappedBy = "supervisor")
     private Set<MeetingRequest> meetingRequests = new LinkedHashSet<>();
 

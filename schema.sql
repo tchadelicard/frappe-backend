@@ -47,6 +47,8 @@ CREATE TABLE supervisors (
     meeting_url VARCHAR(255),
     caldav_username VARCHAR(255),
     caldav_password VARCHAR(255),
+    caldav_password_salt VARCHAR(255),
+    caldav_password_iv VARCHAR(255),
     FOREIGN KEY (supervisor_id) REFERENCES users(user_id)
 );
 
