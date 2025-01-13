@@ -5,6 +5,7 @@ import fr.imt_atlantique.frappe.dtos.EncryptionResult;
 import fr.imt_atlantique.frappe.dtos.RegistrationRequest;
 import fr.imt_atlantique.frappe.dtos.SupervisorDTO;
 import fr.imt_atlantique.frappe.entities.Supervisor;
+import fr.imt_atlantique.frappe.repositories.CampusRepository;
 import fr.imt_atlantique.frappe.repositories.SupervisorRepository;
 import fr.imt_atlantique.frappe.repositories.UserRepository;
 import org.modelmapper.ModelMapper;
@@ -23,13 +24,15 @@ public class SupervisorService {
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
     private final EncryptionService encryptionService;
+    private final CampusRepository campusRepository;
 
-    public SupervisorService(UserRepository userRepository, SupervisorRepository supervisorRepository, ModelMapper modelMapper, PasswordEncoder passwordEncoder, EncryptionService encryptionService) {
+    public SupervisorService(UserRepository userRepository, SupervisorRepository supervisorRepository, ModelMapper modelMapper, PasswordEncoder passwordEncoder, EncryptionService encryptionService, CampusRepository campusRepository) {
         this.userRepository = userRepository;
         this.supervisorRepository = supervisorRepository;
         this.modelMapper = modelMapper;
         this.passwordEncoder = passwordEncoder;
         this.encryptionService = encryptionService;
+        this.campusRepository = campusRepository;
     }
 
     public ResponseEntity<List<SupervisorDTO>> getSupervisors() {
@@ -59,6 +62,7 @@ public class SupervisorService {
             supervisor.setPassword(passwordEncoder.encode(request.getPassword()));
             supervisor.setFirstName(request.getFirstName());
             supervisor.setLastName(request.getLastName());
+            supervisor.setCampus(campusRepository.findById(request.getCampusId()).orElseThrow());
             supervisor.setMeetingUrl(request.getMeetingUrl());
             supervisor.setCaldavUsername(request.getCaldavUsername());
             supervisor.setCaldavPassword(encryptionResult.getEncryptedData()); // Store encrypted password
@@ -88,6 +92,9 @@ public class SupervisorService {
         }
         if (userRepository.existsByUsername(request.getUsername())) {
             return "Username is already taken.";
+        }
+        if (!campusRepository.existsById(request.getCampusId())) {
+            return "Campus does not exist.";
         }
         return null;
     }
