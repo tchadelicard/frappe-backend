@@ -10,6 +10,7 @@ import java.time.LocalDate;
 @Setter
 @Entity
 @Table(name = "meeting_requests")
+@Inheritance(strategy = InheritanceType.JOINED)
 public class MeetingRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "meeting_requests_id_gen")
@@ -46,8 +47,5 @@ public class MeetingRequest {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "supervisor_id", nullable = false)
     private Supervisor supervisor;
-
-    @OneToOne
-    private InternshipRequest internshipRequest;
 
 }
