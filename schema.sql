@@ -115,8 +115,8 @@ CREATE TABLE actions (
 -- Create meeting_requests table
 CREATE TABLE meeting_requests (
     meeting_request_id BIGSERIAL PRIMARY KEY,
-    date DATE NOT NULL,
-    duration INTEGER NOT NULL,
+    start_date TIMESTAMP NOT NULL,
+    end_date TIMESTAMP NOT NULL,
     theme VARCHAR(255) NOT NULL,
     location VARCHAR(255) NOT NULL,
     request_description TEXT NOT NULL,
