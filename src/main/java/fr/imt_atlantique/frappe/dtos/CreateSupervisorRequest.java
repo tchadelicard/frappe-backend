@@ -9,6 +9,7 @@ public class CreateSupervisorRequest {
     private String password;
     private String firstName;
     private String lastName;
+    private Long campusId;
     private String meetingUrl;
     private String caldavUsername;
     private String caldavPassword;
