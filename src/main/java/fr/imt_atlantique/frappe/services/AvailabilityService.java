@@ -33,7 +33,7 @@ public class AvailabilityService {
         this.webClientBuilder = webClientBuilder;
     }
 
-    public ResponseEntity<?> getAvailableDaysForSupervisor(Long id, String duration) {
+    public ResponseEntity<?> getAvailableDaysForSupervisor(Long id, String duration, LocalDate startDate, LocalDate endDate) {
         Optional<Supervisor> supervisorOptional = supervisorRepository.findById(id);
         if (supervisorOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -54,6 +54,8 @@ public class AvailabilityService {
                     .username(supervisor.getCaldavUsername())
                     .password(caldavPassword)
                     .duration(duration)
+                    .startDate(startDate)
+                    .endDate(endDate)
                     .build();
 
             // Use WebClient to POST and map response to List<String>

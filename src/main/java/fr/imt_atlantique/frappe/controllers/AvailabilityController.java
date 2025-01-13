@@ -19,8 +19,8 @@ public class AvailabilityController {
     }
 
     @GetMapping("/{id}/days")
-    public ResponseEntity<?> getAvailableDaysForSupervisor(@PathVariable Long id, @RequestParam String duration) {
-        return availabilityService.getAvailableDaysForSupervisor(id, duration);
+    public ResponseEntity<?> getAvailableDaysForSupervisor(@PathVariable Long id, @RequestParam String duration, @RequestParam LocalDate startDate, @RequestParam LocalDate endDate) {
+        return availabilityService.getAvailableDaysForSupervisor(id, duration, startDate, endDate);
     }
 
     @GetMapping("/{id}/slots")
