@@ -8,16 +8,8 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "internship_requests")
-public class InternshipRequest {
-    @Id
-    @Column(name = "internship_request_id", nullable = false)
-    private Long id;
-
-    @MapsId
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "internship_request_id", nullable = false)
-    private MeetingRequest meetingRequests;
-
+@PrimaryKeyJoinColumn(name = "internship_request_id")
+public class InternshipRequest extends MeetingRequest {
     @Column(name = "internship_duration", nullable = false)
     private Integer internshipDuration;
 

@@ -47,6 +47,8 @@ CREATE TABLE supervisors (
     meeting_url VARCHAR(255),
     caldav_username VARCHAR(255),
     caldav_password VARCHAR(255),
+    caldav_password_salt VARCHAR(255),
+    caldav_password_iv VARCHAR(255),
     FOREIGN KEY (supervisor_id) REFERENCES users(user_id)
 );
 
@@ -113,8 +115,8 @@ CREATE TABLE actions (
 -- Create meeting_requests table
 CREATE TABLE meeting_requests (
     meeting_request_id BIGSERIAL PRIMARY KEY,
-    date DATE NOT NULL,
-    duration INTEGER NOT NULL,
+    start_date TIMESTAMP NOT NULL,
+    end_date TIMESTAMP NOT NULL,
     theme VARCHAR(255) NOT NULL,
     location VARCHAR(255) NOT NULL,
     request_description TEXT NOT NULL,
