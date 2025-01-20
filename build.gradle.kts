@@ -28,6 +28,7 @@ dependencies {
 	implementation("org.postgresql:postgresql")
 	implementation("io.jsonwebtoken:jjwt-api:0.12.6")
 	implementation("org.modelmapper:modelmapper:3.0.0")
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
 	compileOnly("org.projectlombok:lombok:1.18.36")
 	annotationProcessor("org.projectlombok:lombok:1.18.36")
 	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
