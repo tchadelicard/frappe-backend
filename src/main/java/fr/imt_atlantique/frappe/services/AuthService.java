@@ -72,6 +72,7 @@ public class AuthService {
             return LoginResponse.builder()
                     .token(null)
                     .message("Invalid email or password.")
+                    .role(null)
                     .build();
         }
 
@@ -80,6 +81,7 @@ public class AuthService {
             return LoginResponse.builder()
                     .token(null)
                     .message("Account is not verified.")
+                    .role(null)
                     .build();
         }
 
@@ -87,6 +89,7 @@ public class AuthService {
         return LoginResponse.builder()
                 .token(token)
                 .message("Login successful.")
+                .role(user.getAuthorities().iterator().next().getAuthority())
                 .build();
     }
 

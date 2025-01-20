@@ -21,3 +21,8 @@ frappe:
     jwt:
       secret-key: ${FRAPPE_JWT_SECRET_KEY}
       expiration-time: 3600000 # 1 hour
+    encryption:
+      secret-key: ${FRAPPE_ENCRYPTION_SECRET_KEY}
+  availability:
+    api:
+        url: ${FRAPPE_AVAILABILITY_API_URL}

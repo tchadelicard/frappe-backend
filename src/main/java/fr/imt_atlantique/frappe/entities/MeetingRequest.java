@@ -5,11 +5,13 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "meeting_requests")
+@Inheritance(strategy = InheritanceType.JOINED)
 public class MeetingRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "meeting_requests_id_gen")
@@ -17,11 +19,11 @@ public class MeetingRequest {
     @Column(name = "meeting_request_id", nullable = false)
     private Long id;
 
-    @Column(name = "date", nullable = false)
-    private LocalDate date;
+    @Column(name = "start_date", nullable = false)
+    private LocalDateTime startDate;
 
-    @Column(name = "duration", nullable = false)
-    private Integer duration;
+    @Column(name = "end_date", nullable = false)
+    private LocalDateTime endDate;
 
     @Column(name = "theme", nullable = false)
     private String theme;
@@ -46,8 +48,5 @@ public class MeetingRequest {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "supervisor_id", nullable = false)
     private Supervisor supervisor;
-
-    @OneToOne
-    private InternshipRequest internshipRequest;
 
 }
