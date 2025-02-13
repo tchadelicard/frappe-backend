@@ -92,4 +92,27 @@ public class SupervisorService {
         return modelMapper.map(supervisor, SupervisorDTO.class);
     }
 
+    public List<MeetingRequestDTO> getMeetingRequests(Long id) {
+        Supervisor supervisor = supervisorRepository.findById(id)
+                .orElseThrow(() -> new SupervisorNotFoundException("Supervisor not found"));
+        return supervisor.getMeetingRequests()
+                .stream()
+                .map(meetingRequest -> modelMapper.map(meetingRequest, MeetingRequestDTO.class))
+                .toList();
+    }
+
+    public List<MeetingRequestDTO> getMeetingRequests(Principal principal) {
+        Supervisor supervisor = supervisorRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new SupervisorNotFoundException("Supervisor not found"));
+        return supervisor.getMeetingRequests()
+                .stream()
+                .map(meetingRequest -> modelMapper.map(meetingRequest, MeetingRequestDTO.class))
+                .toList();
+    }
+
+    public SupervisorDTO getSupervisor(Long id) {
+        Supervisor supervisor = supervisorRepository.findById(id)
+                .orElseThrow(() -> new SupervisorNotFoundException("Supervisor not found"));
+        return modelMapper.map(supervisor, SupervisorDTO.class);
+    }
 }
