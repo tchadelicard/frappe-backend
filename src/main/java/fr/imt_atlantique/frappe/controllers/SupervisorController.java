@@ -6,6 +6,7 @@ import fr.imt_atlantique.frappe.services.SupervisorService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -18,14 +19,21 @@ public class SupervisorController {
         this.supervisorService = supervisorService;
     }
 
-    @GetMapping("/")
+    @GetMapping
     public ResponseEntity<List<SupervisorDTO>> getSupervisors() {
-        return supervisorService.getSupervisors();
+        return ResponseEntity.ok(supervisorService.getSupervisors());
     }
 
-    @PostMapping("/")
+    @PostMapping
     public ResponseEntity<?> createSupervisor(@RequestBody CreateSupervisorRequest request) {
-        return supervisorService.createSupervisor(request);
+        SupervisorDTO supervisorDTO = supervisorService.createSupervisor(request);
+        return ResponseEntity.ok(supervisorDTO);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<SupervisorDTO> getMe(Principal principal) {
+        SupervisorDTO supervisorDTO = supervisorService.getMe(principal);
+        return ResponseEntity.ok(supervisorDTO);
     }
 
 }
