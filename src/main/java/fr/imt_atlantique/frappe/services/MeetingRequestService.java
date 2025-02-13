@@ -1,7 +1,10 @@
 package fr.imt_atlantique.frappe.services;
 
+import fr.imt_atlantique.frappe.dtos.AvailabilitySlotDTO;
 import fr.imt_atlantique.frappe.dtos.MeetingRequestDTO;
 import fr.imt_atlantique.frappe.entities.MeetingRequest;
+import fr.imt_atlantique.frappe.entities.Student;
+import fr.imt_atlantique.frappe.entities.Supervisor;
 import fr.imt_atlantique.frappe.repositories.MeetingRequestRepository;
 import fr.imt_atlantique.frappe.repositories.StudentRepository;
 import fr.imt_atlantique.frappe.repositories.SupervisorRepository;
@@ -20,6 +23,7 @@ import net.fortuna.ical4j.model.parameter.PartStat;
 import net.fortuna.ical4j.model.parameter.Role;
 import net.fortuna.ical4j.model.parameter.Rsvp;
 import net.fortuna.ical4j.model.property.*;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -30,8 +34,11 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -45,6 +52,8 @@ public class MeetingRequestService {
     private final StudentRepository studentRepository;
     private final SupervisorRepository supervisorRepository;
     private final JavaMailSender mailSender;
+    private final AvailabilityService availabilityService;
+    private final ModelMapper modelMapper;
 
     @Value("${frappe.mail.host}")
     private String host;
@@ -59,17 +68,43 @@ public class MeetingRequestService {
     private String from;
 
     public MeetingRequestService(MeetingRequestRepository meetingRequestRepository,
-                                 StudentRepository studentRepository, 
+                                 StudentRepository studentRepository,
                                  SupervisorRepository supervisorRepository,
-                                 JavaMailSender mailSender) {
+                                 JavaMailSender mailSender, AvailabilityService availabilityService, ModelMapper modelMapper) {
         this.meetingRequestRepository = meetingRequestRepository;
         this.studentRepository = studentRepository;
         this.supervisorRepository = supervisorRepository;
         this.mailSender = mailSender;
+        this.availabilityService = availabilityService;
+        this.modelMapper = modelMapper;
     }
 
 
-    public void createMeetingRequest(MeetingRequestDTO meetingRequestDTO) throws MessagingException, IOException {
+    public MeetingRequestDTO createMeetingRequest(MeetingRequestDTO meetingRequestDTO) throws MessagingException, IOException {
+        if (!meetingRequestDTO.getStartDate().toLocalDate().equals(meetingRequestDTO.getEndDate().toLocalDate())) {
+            throw new RuntimeException("Meeting must be on the same day");
+        }
+
+        Student student = studentRepository.findById(meetingRequestDTO.getStudentId())
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        Supervisor supervisor = supervisorRepository.findById(meetingRequestDTO.getSupervisorId())
+                .orElseThrow(() -> new RuntimeException("Supervisor not found"));
+
+        LocalDate date = meetingRequestDTO.getStartDate().toLocalDate();
+
+        long minutes = ChronoUnit.MINUTES.between(meetingRequestDTO.getStartDate(), meetingRequestDTO.getEndDate());
+
+        List<AvailabilitySlotDTO> availableSlots = availabilityService.getAvailableSlotsForSupervisor(supervisor.getId(), date, String.valueOf(minutes) + "m");
+
+        boolean isSlotAvailable = availableSlots.stream()
+                .anyMatch(slot -> slot.getStart().equals(meetingRequestDTO.getStartDate().atOffset(ZoneOffset.UTC)) &&
+                        slot.getEnd().equals(meetingRequestDTO.getEndDate().atOffset(ZoneOffset.UTC)));
+
+        if (!isSlotAvailable) {
+            throw new RuntimeException("Slot is not available");
+        }
+
         // Create and save the meeting request in the database
         MeetingRequest meetingRequest = new MeetingRequest();
         meetingRequest.setStartDate(meetingRequestDTO.getStartDate());
@@ -78,12 +113,8 @@ public class MeetingRequestService {
         meetingRequest.setLocation(meetingRequestDTO.getLocation());
         meetingRequest.setRequestDescription(meetingRequestDTO.getRequestDescription());
         meetingRequest.setStatus(meetingRequestDTO.getStatus());
-
-        // Fetch student and supervisor from DB
-        meetingRequest.setStudent(studentRepository.findById(meetingRequestDTO.getStudentId())
-                .orElseThrow(() -> new RuntimeException("Student not found")));
-        meetingRequest.setSupervisor(supervisorRepository.findById(meetingRequestDTO.getSupervisorId())
-                .orElseThrow(() -> new RuntimeException("Supervisor not found")));
+        meetingRequest.setStudent(student);
+        meetingRequest.setSupervisor(supervisor);
 
         meetingRequestRepository.save(meetingRequest);
 
@@ -92,6 +123,8 @@ public class MeetingRequestService {
 
         // Send meeting request email with ICS attachment
         sendMeetingInvitation(meetingRequest, ics);
+
+        return modelMapper.map(meetingRequest, MeetingRequestDTO.class);
     }
 
     private String generateICSEvent(MeetingRequest meetingRequest) {
