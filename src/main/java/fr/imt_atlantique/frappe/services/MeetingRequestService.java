@@ -1,6 +1,8 @@
 package fr.imt_atlantique.frappe.services;
 
+import fr.imt_atlantique.frappe.dtos.ActionDTO;
 import fr.imt_atlantique.frappe.dtos.AvailabilitySlotDTO;
+import fr.imt_atlantique.frappe.dtos.CreateMeetingRequestRequest;
 import fr.imt_atlantique.frappe.dtos.MeetingRequestDTO;
 import fr.imt_atlantique.frappe.entities.MeetingRequest;
 import fr.imt_atlantique.frappe.entities.Student;
@@ -80,26 +82,26 @@ public class MeetingRequestService {
     }
 
 
-    public MeetingRequestDTO createMeetingRequest(MeetingRequestDTO meetingRequestDTO) throws MessagingException, IOException {
-        if (!meetingRequestDTO.getStartDate().toLocalDate().equals(meetingRequestDTO.getEndDate().toLocalDate())) {
+    public MeetingRequestDTO createMeetingRequest(CreateMeetingRequestRequest request) throws MessagingException, IOException {
+        if (!request.getStartDate().toLocalDate().equals(request.getEndDate().toLocalDate())) {
             throw new RuntimeException("Meeting must be on the same day");
         }
 
-        Student student = studentRepository.findById(meetingRequestDTO.getStudentId())
+        Student student = studentRepository.findById(request.getStudentId())
                 .orElseThrow(() -> new RuntimeException("Student not found"));
 
-        Supervisor supervisor = supervisorRepository.findById(meetingRequestDTO.getSupervisorId())
+        Supervisor supervisor = supervisorRepository.findById(request.getSupervisorId())
                 .orElseThrow(() -> new RuntimeException("Supervisor not found"));
 
-        LocalDate date = meetingRequestDTO.getStartDate().toLocalDate();
+        LocalDate date = request.getStartDate().toLocalDate();
 
-        long minutes = ChronoUnit.MINUTES.between(meetingRequestDTO.getStartDate(), meetingRequestDTO.getEndDate());
+        long minutes = ChronoUnit.MINUTES.between(request.getStartDate(), request.getEndDate());
 
         List<AvailabilitySlotDTO> availableSlots = availabilityService.getAvailableSlotsForSupervisor(supervisor.getId(), date, String.valueOf(minutes) + "m");
 
         boolean isSlotAvailable = availableSlots.stream()
-                .anyMatch(slot -> slot.getStart().equals(meetingRequestDTO.getStartDate().atOffset(ZoneOffset.UTC)) &&
-                        slot.getEnd().equals(meetingRequestDTO.getEndDate().atOffset(ZoneOffset.UTC)));
+                .anyMatch(slot -> slot.getStart().equals(request.getStartDate().atOffset(ZoneOffset.UTC)) &&
+                        slot.getEnd().equals(request.getEndDate().atOffset(ZoneOffset.UTC)));
 
         if (!isSlotAvailable) {
             throw new RuntimeException("Slot is not available");
@@ -107,12 +109,12 @@ public class MeetingRequestService {
 
         // Create and save the meeting request in the database
         MeetingRequest meetingRequest = new MeetingRequest();
-        meetingRequest.setStartDate(meetingRequestDTO.getStartDate());
-        meetingRequest.setEndDate(meetingRequestDTO.getEndDate());
-        meetingRequest.setTheme(meetingRequestDTO.getTheme());
-        meetingRequest.setLocation(meetingRequestDTO.getLocation());
-        meetingRequest.setRequestDescription(meetingRequestDTO.getRequestDescription());
-        meetingRequest.setStatus(meetingRequestDTO.getStatus());
+        meetingRequest.setStartDate(request.getStartDate());
+        meetingRequest.setEndDate(request.getEndDate());
+        meetingRequest.setTheme(request.getTheme());
+        meetingRequest.setLocation(request.getLocation());
+        meetingRequest.setRequestDescription(request.getRequestDescription());
+        meetingRequest.setStatus("PENDING");
         meetingRequest.setStudent(student);
         meetingRequest.setSupervisor(supervisor);
 
@@ -294,7 +296,8 @@ public class MeetingRequestService {
     }
 
     private void updateMeetingRequest(String email, Long meetingRequestId, String status) {
-        MeetingRequest meetingRequest = meetingRequestRepository.findById(meetingRequestId).orElseThrow();
+        MeetingRequest meetingRequest = meetingRequestRepository.findById(meetingRequestId)
+                .orElseThrow(() -> new RuntimeException("Meeting request not found"));
         meetingRequest.setStatus(status);
         meetingRequestRepository.save(meetingRequest);
         log.info("✅ Meeting request updated for: {}", email);
@@ -308,5 +311,31 @@ public class MeetingRequestService {
             return Long.parseLong(matcher.group(1)); // Extract numeric ID
         }
         return null; // If no match, return null
+    }
+
+    public ActionDTO getAction(Long id) {
+        MeetingRequest meetingRequest = meetingRequestRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Meeting request not found"));
+
+        fr.imt_atlantique.frappe.entities.Action action = meetingRequest.getAction();
+        if (action == null) {
+            throw new RuntimeException("Action not found");
+        }
+
+        return modelMapper.map(action, ActionDTO.class);
+    }
+
+    public ActionDTO createAction(Long id, ActionDTO actionDTO) {
+        MeetingRequest meetingRequest = meetingRequestRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Meeting request not found"));
+
+        fr.imt_atlantique.frappe.entities.Action action = new fr.imt_atlantique.frappe.entities.Action();
+        action.setNotes(actionDTO.getNotes());
+        action.setActionPlan(actionDTO.getActionPlan());
+
+        meetingRequest.setAction(action);
+        meetingRequestRepository.save(meetingRequest);
+
+        return modelMapper.map(action, ActionDTO.class);
     }
 }
