@@ -3,10 +3,11 @@ package fr.imt_atlantique.frappe.controllers;
 import fr.imt_atlantique.frappe.dtos.CreateSupervisorRequest;
 import fr.imt_atlantique.frappe.dtos.MeetingRequestDTO;
 import fr.imt_atlantique.frappe.dtos.SupervisorDTO;
+import fr.imt_atlantique.frappe.dtos.UpdateSupervisorRequest;
 import fr.imt_atlantique.frappe.services.SupervisorService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -48,6 +49,13 @@ public class SupervisorController {
     @GetMapping("/me")
     public ResponseEntity<SupervisorDTO> getMe(Principal principal) {
         SupervisorDTO supervisorDTO = supervisorService.getMe(principal);
+        return ResponseEntity.ok(supervisorDTO);
+    }
+
+    @Transactional
+    @PatchMapping("/me")
+    public ResponseEntity<SupervisorDTO> updateMe(Principal principal, @Valid @RequestBody UpdateSupervisorRequest request) {
+        SupervisorDTO supervisorDTO = supervisorService.updateMe(principal, request);
         return ResponseEntity.ok(supervisorDTO);
     }
 
