@@ -2,22 +2,17 @@ package fr.imt_atlantique.frappe.services;
 
 import fr.imt_atlantique.frappe.dtos.*;
 import fr.imt_atlantique.frappe.entities.Campus;
-import fr.imt_atlantique.frappe.entities.Student;
 import fr.imt_atlantique.frappe.entities.Supervisor;
 import fr.imt_atlantique.frappe.exceptions.SupervisorNotFoundException;
 import fr.imt_atlantique.frappe.repositories.CampusRepository;
 import fr.imt_atlantique.frappe.repositories.SupervisorRepository;
 import fr.imt_atlantique.frappe.repositories.UserRepository;
 import org.modelmapper.ModelMapper;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
 import java.util.List;
-import java.util.Optional;
-import java.util.regex.Pattern;
 
 @Service
 public class SupervisorService {
@@ -89,6 +84,67 @@ public class SupervisorService {
     public SupervisorDTO getMe(Principal principal) {
         Supervisor supervisor = supervisorRepository.findByUsername(principal.getName())
                 .orElseThrow(() -> new SupervisorNotFoundException("Supervisor not found"));
+        return modelMapper.map(supervisor, SupervisorDTO.class);
+    }
+
+    public SupervisorDTO updateMe(Principal principal, UpdateSupervisorRequest request) {
+        Supervisor supervisor = supervisorRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new SupervisorNotFoundException("Supervisor not found"));
+
+        // Validate username uniqueness if provided and different from the current one
+        if (request.getUsername() != null && !request.getUsername().equals(supervisor.getUsername())) {
+            if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+                throw new RuntimeException("Username is already taken.");
+            }
+            supervisor.setUsername(request.getUsername());
+        }
+
+        // Validate email uniqueness if provided and different from the current one
+        if (request.getEmail() != null && !request.getEmail().equals(supervisor.getEmail())) {
+            if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+                throw new RuntimeException("Email is already taken.");
+            }
+            supervisor.setEmail(request.getEmail());
+        }
+
+        // Update password if provided (regex in DTO ensures validity)
+        if (request.getPassword() != null) {
+            supervisor.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+
+        // Update first name if provided
+        if (request.getFirstName() != null) {
+            supervisor.setFirstName(request.getFirstName());
+        }
+
+        // Update last name if provided
+        if (request.getLastName() != null) {
+            supervisor.setLastName(request.getLastName());
+        }
+
+        // Update campus if provided
+        if (request.getCampusId() != null) {
+            Campus campus = campusRepository.findById(request.getCampusId())
+                    .orElseThrow(() -> new RuntimeException("Campus does not exist."));
+            supervisor.setCampus(campus);
+        }
+
+        // Update optional fields if provided
+        if (request.getMeetingUrl() != null) {
+            supervisor.setMeetingUrl(request.getMeetingUrl());
+        }
+
+        if (request.getCaldavUsername() != null) {
+            supervisor.setCaldavUsername(request.getCaldavUsername());
+        }
+
+        if (request.getCaldavPassword() != null) {
+            supervisor.setCaldavPassword(request.getCaldavPassword());
+        }
+
+        // Save updated supervisor
+        supervisorRepository.save(supervisor);
+
         return modelMapper.map(supervisor, SupervisorDTO.class);
     }
 

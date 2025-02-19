@@ -4,36 +4,32 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
+import org.hibernate.validator.constraints.URL;
 
 @Data
-public class CreateSupervisorRequest {
-    @NotBlank(message = "Username is mandatory")
+public class UpdateSupervisorRequest {
+    @NotBlank
     private String username;
 
-    @NotBlank(message = "Email is mandatory")
     @Email(regexp = "[a-z0-9+_.-]+@imt-atlantique\\.(?:fr|net)$", flags = Pattern.Flag.CASE_INSENSITIVE, message = "Email must be an IMT Atlantique email")
     private String email;
 
-    @NotBlank(message = "Password is mandatory")
     @Pattern(regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$", message = "Password must contain at least 8 characters, one digit, one lowercase letter, one uppercase letter and one special character")
     private String password;
 
-    @NotBlank(message = "First name is mandatory")
+    @NotBlank
     private String firstName;
 
-    @NotBlank(message = "Last name is mandatory")
+    @NotBlank
     private String lastName;
 
-    @NotBlank(message = "Campus ID is mandatory")
     private Long campusId;
 
-    @NotBlank(message = "Meeting URL is mandatory")
+    @URL
     private String meetingUrl;
 
-    @NotBlank(message = "CalDAV username is mandatory")
-    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$", message = "Password must contain at least 8 characters, one digit, one lowercase letter, one uppercase letter and one special character")
+    @Email(regexp = "[a-z0-9+_.-]+@imt-atlantique\\.(?:fr|net)$", flags = Pattern.Flag.CASE_INSENSITIVE, message = "Email must be an IMT Atlantique email")
     private String caldavUsername;
 
-    @NotBlank(message = "CalDAV password is mandatory")
     private String caldavPassword;
 }
