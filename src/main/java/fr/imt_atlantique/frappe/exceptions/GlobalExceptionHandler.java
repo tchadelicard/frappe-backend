@@ -27,6 +27,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body("Bad request: " + ex.getMessage());
     }
 
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, String>> handleRuntimeException(ApplicationException ex) {
+        return ResponseEntity.badRequest()
+                .body(Map.of("error", ex.getClass().getSimpleName(), "details", ex.getMessage()));
+    }
+
     @ExceptionHandler(ApplicationException.class)
     public ResponseEntity<Map<String, String>> handleApplicationExceptions(ApplicationException ex) {
         return ResponseEntity.badRequest()
