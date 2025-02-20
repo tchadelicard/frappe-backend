@@ -1,11 +1,13 @@
 package fr.imt_atlantique.frappe.services;
 
+import fr.imt_atlantique.frappe.dtos.MeetingRequestDTO;
 import fr.imt_atlantique.frappe.dtos.RegistrationRequest;
 import fr.imt_atlantique.frappe.dtos.StudentDTO;
 import fr.imt_atlantique.frappe.dtos.StudentUpdateRequest;
 import fr.imt_atlantique.frappe.entities.Campus;
 import fr.imt_atlantique.frappe.entities.CreditTransfer;
 import fr.imt_atlantique.frappe.entities.Student;
+import fr.imt_atlantique.frappe.exceptions.StudentNotFoundException;
 import fr.imt_atlantique.frappe.repositories.CampusRepository;
 import fr.imt_atlantique.frappe.repositories.CreditTransferRepository;
 import fr.imt_atlantique.frappe.repositories.StudentRepository;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -91,5 +94,19 @@ public class StudentService {
     private boolean isValidPassword(String password) {
         String passwordRegex = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$";
         return Pattern.matches(passwordRegex, password);
+    }
+
+    public List<MeetingRequestDTO> getMeetingRequests(Principal principal) {
+        Student student = studentRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new StudentNotFoundException("Student not found"));
+        return student.getMeetingRequests().stream()
+                .map(meetingRequest -> modelMapper.map(meetingRequest, MeetingRequestDTO.class))
+                .toList();
+    }
+
+    public StudentDTO getStudent(Long id) {
+        Student student = studentRepository.findById(id)
+                .orElseThrow(() -> new StudentNotFoundException("Student not found"));
+        return modelMapper.map(student, StudentDTO.class);
     }
 }
