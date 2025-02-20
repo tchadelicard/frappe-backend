@@ -57,10 +57,10 @@ public class SecurityConfig {
                         .requestMatchers("/meeting-requests/**").permitAll()
                         .requestMatchers("/campuses/**").permitAll()
                         .requestMatchers("/credit-transfers/**").permitAll()
-                        .requestMatchers("/supervisors/me").hasRole("SUPERVISOR")
+                        .requestMatchers("/supervisors/me", "/supervisors/me/meeting-requests", "/students/**").hasRole("SUPERVISOR")
                         .requestMatchers("/supervisors/**").permitAll()
                         .requestMatchers("/availabilities/**").permitAll()
-                        .requestMatchers("/students/me").hasRole("STUDENT")
+                        .requestMatchers("/students/me", "/students/me/meeting-requests").hasRole("STUDENT")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
