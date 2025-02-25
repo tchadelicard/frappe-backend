@@ -14,9 +14,9 @@ import java.util.List;
 @Setter
 @Entity
 @Table(name = "users", uniqueConstraints = {
-        @UniqueConstraint(name = "users_username_key", columnNames = {"username"}),
-        @UniqueConstraint(name = "users_email_key", columnNames = {"email"}),
-        @UniqueConstraint(name = "users_phone_number_key", columnNames = {"phone_number"})
+        @UniqueConstraint(name = "users_username_key", columnNames = { "username" }),
+        @UniqueConstraint(name = "users_email_key", columnNames = { "email" }),
+        @UniqueConstraint(name = "users_phone_number_key", columnNames = { "phone_number" })
 })
 @Inheritance(strategy = InheritanceType.JOINED)
 public class User implements UserDetails {
@@ -54,7 +54,7 @@ public class User implements UserDetails {
     @Column(name = "validation_code_expiry")
     private Instant validationCodeExpiry;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "campus_id")
     private Campus campus;
 
