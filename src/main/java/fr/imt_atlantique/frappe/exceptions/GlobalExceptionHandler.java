@@ -1,8 +1,6 @@
 package fr.imt_atlantique.frappe.exceptions;
 
-
 import jakarta.validation.ConstraintViolationException;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -37,5 +35,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleApplicationExceptions(ApplicationException ex) {
         return ResponseEntity.badRequest()
                 .body(Map.of("error", ex.getClass().getSimpleName(), "details", ex.getMessage()));
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<String> handleNotFoundException(NotFoundException ex) {
+        return ResponseEntity.notFound().build();
     }
 }

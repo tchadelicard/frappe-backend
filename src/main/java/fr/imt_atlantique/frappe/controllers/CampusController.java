@@ -22,14 +22,16 @@ public class CampusController {
         this.campusService = campusService;
     }
 
-    @GetMapping("/")
-    public ResponseEntity<List<CampusDTO>> getAllCampuses() {
-        return campusService.getAllCampuses();
+    @GetMapping
+    public ResponseEntity<List<CampusDTO>> getCampuses() {
+        List<CampusDTO> campuses = campusService.getCampuses();
+        return ResponseEntity.ok(campuses);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<CampusDTO> getCampusById(@PathVariable @Min(1) Long id) {
-        return campusService.getCampusById(id);
+        CampusDTO campus = campusService.getCampusById(id);
+        return ResponseEntity.ok(campus);
     }
 
 }
