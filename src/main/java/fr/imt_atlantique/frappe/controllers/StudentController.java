@@ -1,7 +1,6 @@
 package fr.imt_atlantique.frappe.controllers;
 
 import fr.imt_atlantique.frappe.dtos.MeetingRequestDTO;
-import fr.imt_atlantique.frappe.dtos.RegistrationRequest;
 import fr.imt_atlantique.frappe.dtos.StudentDTO;
 import fr.imt_atlantique.frappe.dtos.StudentUpdateRequest;
 import fr.imt_atlantique.frappe.services.StudentService;

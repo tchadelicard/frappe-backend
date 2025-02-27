@@ -3,7 +3,6 @@ package fr.imt_atlantique.frappe.controllers;
 import fr.imt_atlantique.frappe.dtos.ActionDTO;
 import fr.imt_atlantique.frappe.dtos.CreateMeetingRequestRequest;
 import fr.imt_atlantique.frappe.dtos.MeetingRequestDTO;
-import fr.imt_atlantique.frappe.entities.Action;
 import fr.imt_atlantique.frappe.services.MeetingRequestService;
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
@@ -25,7 +24,8 @@ public class MeetingRequestController {
 
     @Transactional
     @PostMapping
-    public ResponseEntity<MeetingRequestDTO> createMeetingRequest(@Valid @RequestBody CreateMeetingRequestRequest request) throws MessagingException, IOException {
+    public ResponseEntity<MeetingRequestDTO> createMeetingRequest(
+            @Valid @RequestBody CreateMeetingRequestRequest request) throws MessagingException, IOException {
         MeetingRequestDTO meetingRequestDTO = meetingRequestService.createMeetingRequest(request);
         return ResponseEntity.ok(meetingRequestDTO);
     }
