@@ -5,7 +5,6 @@ import fr.imt_atlantique.frappe.dtos.GetAvailableDaysRequest;
 import fr.imt_atlantique.frappe.dtos.GetAvailableSlotsRequest;
 import fr.imt_atlantique.frappe.entities.Supervisor;
 import fr.imt_atlantique.frappe.exceptions.SupervisorNotFoundException;
-import fr.imt_atlantique.frappe.repositories.SupervisorRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
@@ -17,22 +16,23 @@ import java.util.List;
 @Service
 public class AvailabilityService {
 
-    private final SupervisorRepository supervisorRepository;
+    private final SupervisorService supervisorService;
     private final EncryptionService encryptionService;
     private final WebClient.Builder webClientBuilder;
 
     @Value("${frappe.availability.api.url}")
     private String availabilityApiUrl;
 
-    public AvailabilityService(SupervisorRepository supervisorRepository, EncryptionService encryptionService, WebClient.Builder webClientBuilder) {
-        this.supervisorRepository = supervisorRepository;
+    public AvailabilityService(SupervisorService supervisorService, EncryptionService encryptionService,
+            WebClient.Builder webClientBuilder) {
+        this.supervisorService = supervisorService;
         this.encryptionService = encryptionService;
         this.webClientBuilder = webClientBuilder;
     }
 
-    public List<LocalDate> getAvailableDaysForSupervisor(Long id, String duration, LocalDate startDate, LocalDate endDate) {
-        Supervisor supervisor = supervisorRepository.findById(id)
-                .orElseThrow(() -> new SupervisorNotFoundException("Supervisor not found"));
+    public List<LocalDate> getAvailableDaysForSupervisor(Long id, String duration, LocalDate startDate,
+            LocalDate endDate) {
+        Supervisor supervisor = supervisorService.getSupervisorById(id);
 
         String caldavPassword = getCalDAVPassword(supervisor);
 
@@ -49,13 +49,13 @@ public class AvailabilityService {
                 .uri(availabilityApiUrl + "/days")
                 .bodyValue(request)
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<List<LocalDate>>() {})
+                .bodyToMono(new ParameterizedTypeReference<List<LocalDate>>() {
+                })
                 .block();
     }
 
     public List<AvailabilitySlotDTO> getAvailableSlotsForSupervisor(Long id, LocalDate date, String duration) {
-        Supervisor supervisor = supervisorRepository.findById(id)
-                .orElseThrow(() -> new SupervisorNotFoundException("Supervisor not found"));
+        Supervisor supervisor = supervisorService.getSupervisorById(id);
 
         String caldavPassword = getCalDAVPassword(supervisor);
 
@@ -71,7 +71,8 @@ public class AvailabilityService {
                 .uri(availabilityApiUrl + "/slots")
                 .bodyValue(request)
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<List<AvailabilitySlotDTO>>() {})
+                .bodyToMono(new ParameterizedTypeReference<List<AvailabilitySlotDTO>>() {
+                })
                 .block();
     }
 
@@ -80,8 +81,7 @@ public class AvailabilityService {
             return encryptionService.decryptData(
                     supervisor.getCaldavPassword(),
                     supervisor.getCaldavPasswordSalt(),
-                    supervisor.getCaldavPasswordIv()
-            );
+                    supervisor.getCaldavPasswordIv());
         } catch (Exception e) {
             throw new SupervisorNotFoundException("Supervisor not found");
         }
