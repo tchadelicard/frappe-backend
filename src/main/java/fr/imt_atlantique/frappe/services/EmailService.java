@@ -5,18 +5,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import fr.imt_atlantique.frappe.entities.MeetingRequest;
-import fr.imt_atlantique.frappe.repositories.MeetingRequestRepository;
+import fr.imt_atlantique.frappe.events.MeetingRequestResponseEvent;
 import jakarta.mail.BodyPart;
 import jakarta.mail.Flags;
 import jakarta.mail.Folder;
@@ -29,12 +27,6 @@ import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.search.FlagTerm;
 import jakarta.mail.util.ByteArrayDataSource;
 import lombok.extern.slf4j.Slf4j;
-import net.fortuna.ical4j.data.CalendarBuilder;
-import net.fortuna.ical4j.model.Calendar;
-import net.fortuna.ical4j.model.Component;
-import net.fortuna.ical4j.model.component.VEvent;
-import net.fortuna.ical4j.model.parameter.PartStat;
-import net.fortuna.ical4j.model.property.Attendee;
 
 @Service
 @Slf4j
@@ -52,11 +44,11 @@ public class EmailService {
     private String from;
 
     private final JavaMailSender mailSender;
-    private final MeetingRequestRepository meetingRequestRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public EmailService(JavaMailSender mailSender, MeetingRequestRepository meetingRequestRepository) {
+    public EmailService(JavaMailSender mailSender, ApplicationEventPublisher eventPublisher) {
         this.mailSender = mailSender;
-        this.meetingRequestRepository = meetingRequestRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     public void sendMeetingInvitation(MeetingRequest meetingRequest, String ics)
@@ -118,8 +110,7 @@ public class EmailService {
                         if (part.isMimeType("text/calendar")) {
                             log.info("📩 Found calendar event (text/calendar)");
                             InputStream is = part.getInputStream();
-                            Calendar calendar = new CalendarBuilder().build(is);
-                            updateMeetingStatusFromICS(calendar);
+                            eventPublisher.publishEvent(new MeetingRequestResponseEvent(is));
                             message.setFlag(Flags.Flag.SEEN, true); // Mark email as read
                             continue;
                         }
@@ -129,8 +120,7 @@ public class EmailService {
                         if (fileName != null && fileName.toLowerCase().endsWith(".ics")) {
                             log.info("\uD83D\uDCE9 Found ICS file attachment: {}", fileName);
                             InputStream is = part.getInputStream();
-                            Calendar calendar = new CalendarBuilder().build(is);
-                            updateMeetingStatusFromICS(calendar);
+                            eventPublisher.publishEvent(new MeetingRequestResponseEvent(is));
                             message.setFlag(Flags.Flag.SEEN, true); // Mark email as read
                         }
                     }
@@ -142,54 +132,6 @@ public class EmailService {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    private void updateMeetingStatusFromICS(Calendar calendar) {
-        for (Component component : calendar.getComponents(Component.VEVENT)) {
-            VEvent event = (VEvent) component;
-            String uid = event.getUid().orElseThrow().toString();
-            Long meetingRequestId = extractMeetingId(uid);
-
-            List<Attendee> attendees = event.getAttendees();
-            for (Attendee attendee : attendees) {
-                String email = attendee.getValue().replace("mailto:", "");
-                PartStat responseStatus = (PartStat) attendee.getParameter(PartStat.PARTSTAT).orElseThrow();
-
-                String status = mapPartStat(responseStatus);
-
-                log.info("✅ Updating status for: {} → {}", email, status);
-                updateMeetingRequest(email, meetingRequestId, status);
-            }
-        }
-    }
-
-    private String mapPartStat(PartStat partStat) {
-        if (partStat.equals(PartStat.ACCEPTED)) {
-            return "ACCEPTED";
-        } else if (partStat.equals(PartStat.DECLINED)) {
-            return "DECLINED";
-        } else if (partStat.equals(PartStat.TENTATIVE)) {
-            return "TENTATIVE";
-        }
-        return "UNKNOWN";
-    }
-
-    private void updateMeetingRequest(String email, Long meetingRequestId, String status) {
-        MeetingRequest meetingRequest = meetingRequestRepository.findById(meetingRequestId)
-                .orElseThrow(() -> new RuntimeException("Meeting request not found"));
-        meetingRequest.setStatus(status);
-        meetingRequestRepository.save(meetingRequest);
-        log.info("✅ Meeting request updated for: {}", email);
-    }
-
-    private Long extractMeetingId(String uid) {
-        Pattern pattern = Pattern.compile("frappe-(\\d+)");
-        Matcher matcher = pattern.matcher(uid);
-
-        if (matcher.find()) {
-            return Long.parseLong(matcher.group(1)); // Extract numeric ID
-        }
-        return null; // If no match, return null
     }
 
 }

@@ -1,6 +1,11 @@
 package fr.imt_atlantique.frappe.services;
 
 import fr.imt_atlantique.frappe.entities.MeetingRequest;
+import fr.imt_atlantique.frappe.events.MeetingRequestCreatedEvent;
+import fr.imt_atlantique.frappe.events.MeetingRequestResponseEvent;
+import jakarta.mail.MessagingException;
+import lombok.extern.slf4j.Slf4j;
+import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.model.*;
 import net.fortuna.ical4j.model.component.VAlarm;
 import net.fortuna.ical4j.model.component.VEvent;
@@ -12,14 +17,43 @@ import net.fortuna.ical4j.model.parameter.Role;
 import net.fortuna.ical4j.model.parameter.Rsvp;
 import net.fortuna.ical4j.model.property.*;
 
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
+@Slf4j
 public class CalendarService {
+
+    private final EmailService emailService;
+    private final MeetingRequestService meetingRequestService;
+
+    public CalendarService(EmailService emailService, MeetingRequestService meetingRequestService) {
+        this.emailService = emailService;
+        this.meetingRequestService = meetingRequestService;
+    }
+
+    @EventListener
+    public void handleMeetingRequestCreatedEvent(MeetingRequestCreatedEvent event)
+            throws IOException, MessagingException {
+        MeetingRequest meetingRequest = event.getMeetingRequest();
+        String ics = createMeetingRequestICS(meetingRequest);
+        emailService.sendMeetingInvitation(meetingRequest, ics);
+    }
+
+    @EventListener
+    public void handleMeetingRequestResponseEvent(MeetingRequestResponseEvent event) {
+        processCalendar(event.getInputStream());
+    }
+
     public String createMeetingRequestICS(MeetingRequest meetingRequest) {
         VTimeZone tz = generateVTimeZone();
         VEvent vevent = createVEvent(meetingRequest);
@@ -92,6 +126,55 @@ public class CalendarService {
                 .withComponent(tz)
                 .withComponent(vevent)
                 .getFluentTarget();
+    }
+
+    public void processCalendar(InputStream is) {
+        try {
+            Calendar calendar = new CalendarBuilder().build(is);
+            updateMeetingStatusFromICS(calendar);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void updateMeetingStatusFromICS(Calendar calendar) {
+        for (Component component : calendar.getComponents(Component.VEVENT)) {
+            VEvent event = (VEvent) component;
+            String uid = event.getUid().orElseThrow().toString();
+            Long meetingRequestId = extractMeetingId(uid);
+
+            List<Attendee> attendees = event.getAttendees();
+            for (Attendee attendee : attendees) {
+                String email = attendee.getValue().replace("mailto:", "");
+                PartStat responseStatus = (PartStat) attendee.getParameter(PartStat.PARTSTAT).orElseThrow();
+
+                String status = mapPartStat(responseStatus);
+
+                log.info("✅ Updating status for: {} → {}", email, status);
+                meetingRequestService.updateMeetingRequestStatus(email, meetingRequestId, status);
+            }
+        }
+    }
+
+    private String mapPartStat(PartStat partStat) {
+        if (partStat.equals(PartStat.ACCEPTED)) {
+            return "ACCEPTED";
+        } else if (partStat.equals(PartStat.DECLINED)) {
+            return "DECLINED";
+        } else if (partStat.equals(PartStat.TENTATIVE)) {
+            return "TENTATIVE";
+        }
+        return "UNKNOWN";
+    }
+
+    private Long extractMeetingId(String uid) {
+        Pattern pattern = Pattern.compile("frappe-(\\d+)");
+        Matcher matcher = pattern.matcher(uid);
+
+        if (matcher.find()) {
+            return Long.parseLong(matcher.group(1)); // Extract numeric ID
+        }
+        return null; // If no match, return null
     }
 
 }
