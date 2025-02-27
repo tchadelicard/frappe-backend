@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -112,7 +113,7 @@ public class CalendarService {
     private VAlarm createVAlarm() {
         VAlarm valarm = (VAlarm) new VAlarm()
                 .withProperty(new Action("DISPLAY"))
-                .withProperty(new Trigger(new Dur(0, 0, -15, 0)))
+                .withProperty(new Trigger(Duration.ofMinutes(-15)))
                 .withProperty(new Description("Reminder"))
                 .getFluentTarget();
         return valarm;
