@@ -1,7 +1,6 @@
 package fr.imt_atlantique.frappe.services;
 
 import fr.imt_atlantique.frappe.dtos.MeetingRequestDTO;
-import fr.imt_atlantique.frappe.dtos.RegistrationRequest;
 import fr.imt_atlantique.frappe.dtos.StudentDTO;
 import fr.imt_atlantique.frappe.dtos.StudentUpdateRequest;
 import fr.imt_atlantique.frappe.entities.Campus;
@@ -30,7 +29,9 @@ public class StudentService {
     private final CreditTransferRepository creditTransferRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public StudentService(StudentRepository studentRepository, ModelMapper modelMapper, CampusRepository campusRepository, CreditTransferRepository creditTransferRepository, PasswordEncoder passwordEncoder) {
+    public StudentService(StudentRepository studentRepository, ModelMapper modelMapper,
+            CampusRepository campusRepository, CreditTransferRepository creditTransferRepository,
+            PasswordEncoder passwordEncoder) {
         this.studentRepository = studentRepository;
         this.modelMapper = modelMapper;
         this.campusRepository = campusRepository;
@@ -47,7 +48,6 @@ public class StudentService {
         return ResponseEntity.notFound().build();
     }
 
-
     @Transactional
     public ResponseEntity<StudentDTO> updateMe(StudentUpdateRequest request, Principal principal) {
         Optional<Student> student = studentRepository.findByUsername(principal.getName());
@@ -55,7 +55,7 @@ public class StudentService {
             return ResponseEntity.notFound().build();
         }
         Student studentToUpdate = student.get();
-        if (request.getPassword() != null && isValidPassword(request.getPassword()) ) {
+        if (request.getPassword() != null && isValidPassword(request.getPassword())) {
             studentToUpdate.setPassword(passwordEncoder.encode(request.getPassword()));
         }
         if (request.getFirstName() != null) {
@@ -67,7 +67,7 @@ public class StudentService {
         if (request.getPhoneNumber() != null) {
             studentToUpdate.setPhoneNumber(request.getPhoneNumber());
         }
-        if (request.getCampusId() != null ) {
+        if (request.getCampusId() != null) {
             Optional<Campus> campus = campusRepository.findById(request.getCampusId());
             if (campus.isEmpty()) {
                 return ResponseEntity.badRequest().build();
@@ -108,5 +108,10 @@ public class StudentService {
         Student student = studentRepository.findById(id)
                 .orElseThrow(() -> new StudentNotFoundException("Student not found"));
         return modelMapper.map(student, StudentDTO.class);
+    }
+
+    public Student getStudentById(Long id) {
+        return studentRepository.findById(id)
+                .orElseThrow(() -> new StudentNotFoundException("Student not found"));
     }
 }

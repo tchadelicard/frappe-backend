@@ -4,16 +4,16 @@ import fr.imt_atlantique.frappe.dtos.ActionDTO;
 import fr.imt_atlantique.frappe.dtos.AvailabilitySlotDTO;
 import fr.imt_atlantique.frappe.dtos.CreateMeetingRequestRequest;
 import fr.imt_atlantique.frappe.dtos.MeetingRequestDTO;
+import fr.imt_atlantique.frappe.entities.Action;
 import fr.imt_atlantique.frappe.entities.MeetingRequest;
 import fr.imt_atlantique.frappe.entities.Student;
 import fr.imt_atlantique.frappe.entities.Supervisor;
+import fr.imt_atlantique.frappe.events.MeetingRequestCreatedEvent;
 import fr.imt_atlantique.frappe.repositories.MeetingRequestRepository;
-import fr.imt_atlantique.frappe.repositories.StudentRepository;
-import fr.imt_atlantique.frappe.repositories.SupervisorRepository;
 import jakarta.mail.*;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -27,54 +27,34 @@ import java.util.List;
 public class MeetingRequestService {
 
     private final MeetingRequestRepository meetingRequestRepository;
-    private final StudentRepository studentRepository;
-    private final SupervisorRepository supervisorRepository;
+    private final StudentService studentService;
+    private final SupervisorService supervisorService;
     private final AvailabilityService availabilityService;
     private final ModelMapper modelMapper;
-    private final CalendarService calendarService;
-    private final EmailService emailService;
-
-    @Value("${frappe.mail.host}")
-    private String host;
-
-    @Value("${spring.mail.username}")
-    private String username;
-
-    @Value("${spring.mail.password}")
-    private String password;
-
-    @Value("${frappe.mail.from}")
-    private String from;
+    private final ApplicationEventPublisher eventPublisher;
 
     public MeetingRequestService(MeetingRequestRepository meetingRequestRepository,
-            StudentRepository studentRepository,
-            SupervisorRepository supervisorRepository,
-            AvailabilityService availabilityService, ModelMapper modelMapper,
-            CalendarService calendarService, EmailService emailService) {
+            StudentService studentService,
+            SupervisorService supervisorService,
+            AvailabilityService availabilityService,
+            ModelMapper modelMapper,
+            ApplicationEventPublisher eventPublisher) {
         this.meetingRequestRepository = meetingRequestRepository;
-        this.studentRepository = studentRepository;
-        this.supervisorRepository = supervisorRepository;
+        this.studentService = studentService;
+        this.supervisorService = supervisorService;
         this.availabilityService = availabilityService;
         this.modelMapper = modelMapper;
-        this.calendarService = calendarService;
-        this.emailService = emailService;
-
+        this.eventPublisher = eventPublisher;
     }
 
     public MeetingRequestDTO createMeetingRequest(CreateMeetingRequestRequest request)
             throws MessagingException, IOException {
-        if (!request.getStartDate().toLocalDate().equals(request.getEndDate().toLocalDate())) {
-            throw new RuntimeException("Meeting must be on the same day");
-        }
+        validateMeetingRequest(request);
 
-        Student student = studentRepository.findById(request.getStudentId())
-                .orElseThrow(() -> new RuntimeException("Student not found"));
-
-        Supervisor supervisor = supervisorRepository.findById(request.getSupervisorId())
-                .orElseThrow(() -> new RuntimeException("Supervisor not found"));
+        Student student = studentService.getStudentById(request.getStudentId());
+        Supervisor supervisor = supervisorService.getSupervisorById(request.getSupervisorId());
 
         LocalDate date = request.getStartDate().toLocalDate();
-
         long minutes = ChronoUnit.MINUTES.between(request.getStartDate(), request.getEndDate());
 
         List<AvailabilitySlotDTO> availableSlots = availabilityService
@@ -88,7 +68,21 @@ public class MeetingRequestService {
             throw new RuntimeException("Slot is not available");
         }
 
-        // Create and save the meeting request in the database
+        MeetingRequest meetingRequest = saveMeetingRequest(request, student, supervisor);
+
+        eventPublisher.publishEvent(new MeetingRequestCreatedEvent(meetingRequest));
+
+        return modelMapper.map(meetingRequest, MeetingRequestDTO.class);
+    }
+
+    private void validateMeetingRequest(CreateMeetingRequestRequest request) {
+        if (!request.getStartDate().toLocalDate().equals(request.getEndDate().toLocalDate())) {
+            throw new RuntimeException("Meeting must be on the same day");
+        }
+    }
+
+    private MeetingRequest saveMeetingRequest(CreateMeetingRequestRequest request, Student student,
+            Supervisor supervisor) {
         MeetingRequest meetingRequest = new MeetingRequest();
         meetingRequest.setStartDate(request.getStartDate());
         meetingRequest.setEndDate(request.getEndDate());
@@ -99,22 +93,22 @@ public class MeetingRequestService {
         meetingRequest.setStudent(student);
         meetingRequest.setSupervisor(supervisor);
 
+        return meetingRequestRepository.save(meetingRequest);
+    }
+
+    public void updateMeetingRequestStatus(String email, Long meetingRequestId, String status) {
+        MeetingRequest meetingRequest = meetingRequestRepository.findById(meetingRequestId)
+                .orElseThrow(() -> new RuntimeException("Meeting request not found"));
+        meetingRequest.setStatus(status);
         meetingRequestRepository.save(meetingRequest);
-
-        // Generate ICS file for the meeting
-        String ics = calendarService.createMeetingRequestICS(meetingRequest);
-
-        // Send meeting request email with ICS attachment
-        emailService.sendMeetingInvitation(meetingRequest, ics);
-
-        return modelMapper.map(meetingRequest, MeetingRequestDTO.class);
+        log.info("✅ Meeting request updated for: {}", email);
     }
 
     public ActionDTO getAction(Long id) {
         MeetingRequest meetingRequest = meetingRequestRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Meeting request not found"));
 
-        fr.imt_atlantique.frappe.entities.Action action = meetingRequest.getAction();
+        Action action = meetingRequest.getAction();
         if (action == null) {
             throw new RuntimeException("Action not found");
         }

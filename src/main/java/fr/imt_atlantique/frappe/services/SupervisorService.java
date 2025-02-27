@@ -23,7 +23,9 @@ public class SupervisorService {
     private final EncryptionService encryptionService;
     private final CampusRepository campusRepository;
 
-    public SupervisorService(UserRepository userRepository, SupervisorRepository supervisorRepository, ModelMapper modelMapper, PasswordEncoder passwordEncoder, EncryptionService encryptionService, CampusRepository campusRepository) {
+    public SupervisorService(UserRepository userRepository, SupervisorRepository supervisorRepository,
+            ModelMapper modelMapper, PasswordEncoder passwordEncoder, EncryptionService encryptionService,
+            CampusRepository campusRepository) {
         this.userRepository = userRepository;
         this.supervisorRepository = supervisorRepository;
         this.modelMapper = modelMapper;
@@ -33,11 +35,11 @@ public class SupervisorService {
     }
 
     public List<SupervisorDTO> getSupervisors() {
-          return supervisorRepository
-                  .findAll()
-                  .stream()
-                  .map(supervisor -> modelMapper.map(supervisor, SupervisorDTO.class))
-                  .toList();
+        return supervisorRepository
+                .findAll()
+                .stream()
+                .map(supervisor -> modelMapper.map(supervisor, SupervisorDTO.class))
+                .toList();
     }
 
     public SupervisorDTO createSupervisor(CreateSupervisorRequest request) {
@@ -58,8 +60,8 @@ public class SupervisorService {
             throw new RuntimeException("Username is already taken.");
         });
 
-        Campus campus = campusRepository.findById(request.getCampusId()).orElseThrow(() -> new RuntimeException("Campus does not exist."));
-
+        Campus campus = campusRepository.findById(request.getCampusId())
+                .orElseThrow(() -> new RuntimeException("Campus does not exist."));
 
         // Create supervisor
         Supervisor supervisor = new Supervisor();
@@ -72,8 +74,8 @@ public class SupervisorService {
         supervisor.setMeetingUrl(request.getMeetingUrl());
         supervisor.setCaldavUsername(request.getCaldavUsername());
         supervisor.setCaldavPassword(encryptionResult.getEncryptedData()); // Store encrypted password
-        supervisor.setCaldavPasswordSalt(encryptionResult.getSalt());      // Store salt
-        supervisor.setCaldavPasswordIv(encryptionResult.getIv());          // Store IV
+        supervisor.setCaldavPasswordSalt(encryptionResult.getSalt()); // Store salt
+        supervisor.setCaldavPasswordIv(encryptionResult.getIv()); // Store IV
         supervisor.setEnabled(true);
 
         supervisorRepository.save(supervisor);
@@ -170,5 +172,10 @@ public class SupervisorService {
         Supervisor supervisor = supervisorRepository.findById(id)
                 .orElseThrow(() -> new SupervisorNotFoundException("Supervisor not found"));
         return modelMapper.map(supervisor, SupervisorDTO.class);
+    }
+
+    public Supervisor getSupervisorById(Long id) {
+        return supervisorRepository.findById(id)
+                .orElseThrow(() -> new SupervisorNotFoundException("Supervisor not found"));
     }
 }
