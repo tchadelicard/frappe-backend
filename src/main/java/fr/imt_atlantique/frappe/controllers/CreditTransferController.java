@@ -27,14 +27,15 @@ public class CreditTransferController {
             @Valid @RequestParam(required = false) String country,
             @Valid @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @Valid @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
-        List<CreditTransferDTO> creditTransfers = creditTransferService.findByFilters(university, country, startDate,
-                endDate);
+        List<CreditTransferDTO> creditTransfers = creditTransferService
+                .toDTOs(creditTransferService.filterCreditTransfers(university, country, startDate,
+                        endDate));
         return ResponseEntity.ok(creditTransfers);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<CreditTransferDTO> getCreditTransfer(@Valid @PathVariable @Min(1) Long id) {
-        CreditTransferDTO creditTransfer = creditTransferService.findById(id);
+        CreditTransferDTO creditTransfer = creditTransferService.toDTO(creditTransferService.getCreditTransferById(id));
         return ResponseEntity.ok(creditTransfer);
     }
 }
