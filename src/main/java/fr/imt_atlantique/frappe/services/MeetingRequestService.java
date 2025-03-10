@@ -57,6 +57,10 @@ public class MeetingRequestService {
                 .toList();
     }
 
+    public ActionDTO toActionDTO(Action action) {
+        return modelMapper.map(action, ActionDTO.class);
+    }
+
     public MeetingRequestDTO createMeetingRequest(CreateMeetingRequestRequest request)
             throws MessagingException, IOException {
         validateMeetingRequest(request);
@@ -114,7 +118,7 @@ public class MeetingRequestService {
         log.info("✅ Meeting request updated for: {}", email);
     }
 
-    public ActionDTO getAction(Long id) {
+    public Action getAction(Long id) {
         MeetingRequest meetingRequest = meetingRequestRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Meeting request not found"));
 
@@ -123,20 +127,20 @@ public class MeetingRequestService {
             throw new RuntimeException("Action not found");
         }
 
-        return modelMapper.map(action, ActionDTO.class);
+        return action;
     }
 
-    public ActionDTO createAction(Long id, ActionDTO actionDTO) {
+    public Action createAction(Long id, ActionDTO actionDTO) {
         MeetingRequest meetingRequest = meetingRequestRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Meeting request not found"));
 
-        fr.imt_atlantique.frappe.entities.Action action = new fr.imt_atlantique.frappe.entities.Action();
+        Action action = new fr.imt_atlantique.frappe.entities.Action();
         action.setNotes(actionDTO.getNotes());
         action.setActionPlan(actionDTO.getActionPlan());
 
         meetingRequest.setAction(action);
         meetingRequestRepository.save(meetingRequest);
 
-        return modelMapper.map(action, ActionDTO.class);
+        return action;
     }
 }

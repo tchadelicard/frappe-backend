@@ -109,7 +109,7 @@ CREATE TABLE students_specialties_per_year (
 CREATE TABLE actions (
     id BIGSERIAL PRIMARY KEY,
     notes TEXT NOT NULL,
-    action_plan TEXT NOT NULL
+    action_plan TEXT NOT NULL,
 );
 
 -- Create meeting_requests table
@@ -121,10 +121,10 @@ CREATE TABLE meeting_requests (
     location VARCHAR(255) NOT NULL,
     request_description TEXT NOT NULL,
     status VARCHAR(255) NOT NULL,
-    action_id BIGINT,
+    action_id BIGINT UNIQUE,
     student_id BIGINT NOT NULL,
     supervisor_id BIGINT NOT NULL,
-    FOREIGN KEY (action_id) REFERENCES actions(id),
+    FOREIGN KEY (action_id) REFERENCES actions(id) ON DELETE CASCADE,
     FOREIGN KEY (student_id) REFERENCES students(student_id),
     FOREIGN KEY (supervisor_id) REFERENCES supervisors(supervisor_id)
 );

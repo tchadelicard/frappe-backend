@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -37,8 +36,8 @@ public class MeetingRequest {
     @Column(name = "status", nullable = false)
     private String status;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "action_id")
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @JoinColumn(name = "action_id", unique = true)
     private Action action;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -48,5 +47,4 @@ public class MeetingRequest {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "supervisor_id", nullable = false)
     private Supervisor supervisor;
-
 }
