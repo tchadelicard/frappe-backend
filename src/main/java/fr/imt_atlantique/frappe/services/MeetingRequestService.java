@@ -47,6 +47,16 @@ public class MeetingRequestService {
         this.eventPublisher = eventPublisher;
     }
 
+    public MeetingRequestDTO toDTO(MeetingRequest meetingRequest) {
+        return modelMapper.map(meetingRequest, MeetingRequestDTO.class);
+    }
+
+    public List<MeetingRequestDTO> toDTOs(List<MeetingRequest> meetingRequests) {
+        return meetingRequests.stream()
+                .map(meetingRequest -> modelMapper.map(meetingRequest, MeetingRequestDTO.class))
+                .toList();
+    }
+
     public MeetingRequestDTO createMeetingRequest(CreateMeetingRequestRequest request)
             throws MessagingException, IOException {
         validateMeetingRequest(request);
