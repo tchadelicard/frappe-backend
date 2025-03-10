@@ -2,6 +2,7 @@ package fr.imt_atlantique.frappe.controllers;
 
 import fr.imt_atlantique.frappe.dtos.CampusDTO;
 import fr.imt_atlantique.frappe.services.CampusService;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -24,13 +25,13 @@ public class CampusController {
 
     @GetMapping
     public ResponseEntity<List<CampusDTO>> getCampuses() {
-        List<CampusDTO> campuses = campusService.getCampuses();
+        List<CampusDTO> campuses = campusService.toDTOs(campusService.getCampuses());
         return ResponseEntity.ok(campuses);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CampusDTO> getCampusById(@PathVariable @Min(1) Long id) {
-        CampusDTO campus = campusService.getCampusById(id);
+    public ResponseEntity<CampusDTO> getCampusById(@Valid @PathVariable @Min(1) Long id) {
+        CampusDTO campus = campusService.toDTO(campusService.getCampusById(id));
         return ResponseEntity.ok(campus);
     }
 
