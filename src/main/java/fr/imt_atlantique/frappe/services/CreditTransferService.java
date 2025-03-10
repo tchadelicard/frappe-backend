@@ -22,7 +22,17 @@ public class CreditTransferService {
         this.modelMapper = modelMapper;
     }
 
-    public List<CreditTransferDTO> findByFilters(String university, String country, LocalDate startDate,
+    public CreditTransferDTO toDTO(CreditTransfer creditTransfer) {
+        return modelMapper.map(creditTransfer, CreditTransferDTO.class);
+    }
+
+    public List<CreditTransferDTO> toDTOs(List<CreditTransfer> creditTransfers) {
+        return creditTransfers.stream()
+                .map(creditTransfer -> modelMapper.map(creditTransfer, CreditTransferDTO.class))
+                .toList();
+    }
+
+    public List<CreditTransfer> filterCreditTransfers(String university, String country, LocalDate startDate,
             LocalDate endDate) {
         Specification<CreditTransfer> spec = Specification
                 .where(CreditTransferSpecification.hasUniversity(university))
@@ -31,13 +41,11 @@ public class CreditTransferService {
                 .and(CreditTransferSpecification.endDateBefore(endDate));
 
         return creditTransferRepository.findAll(spec).stream()
-                .map(creditTransfer -> modelMapper.map(creditTransfer, CreditTransferDTO.class))
                 .toList();
     }
 
-    public CreditTransferDTO findById(Long id) {
+    public CreditTransfer getCreditTransferById(Long id) {
         return creditTransferRepository.findById(id)
-                .map(creditTransfer -> modelMapper.map(creditTransfer, CreditTransferDTO.class))
                 .orElseThrow(() -> new CreditTransferNotFoundException(Long.toString(id)));
     }
 }
