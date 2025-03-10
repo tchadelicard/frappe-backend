@@ -4,8 +4,6 @@ import fr.imt_atlantique.frappe.dtos.CampusDTO;
 import fr.imt_atlantique.frappe.entities.Campus;
 import fr.imt_atlantique.frappe.exceptions.CampusNotFoundException;
 import fr.imt_atlantique.frappe.repositories.CampusRepository;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
@@ -21,17 +19,22 @@ public class CampusService {
         this.modelMapper = modelMapper;
     }
 
-    public List<CampusDTO> getCampuses() {
-        List<Campus> campuses = campusRepository.findAll();
+    public CampusDTO toDTO(Campus campus) {
+        return modelMapper.map(campus, CampusDTO.class);
+    }
+
+    public List<CampusDTO> toDTOs(List<Campus> campuses) {
         return campuses.stream()
                 .map(campus -> modelMapper.map(campus, CampusDTO.class))
                 .toList();
     }
 
-    public CampusDTO getCampusById(@Valid @Min(1) Long id) {
-        return campusRepository.findById(id)
-                .map(campus -> modelMapper.map(campus, CampusDTO.class))
-                .orElseThrow(() -> new CampusNotFoundException(Long.toString(id)));
+    public List<Campus> getCampuses() {
+        return campusRepository.findAll();
     }
 
+    public Campus getCampusById(Long id) {
+        return campusRepository.findById(id)
+                .orElseThrow(() -> new CampusNotFoundException(Long.toString(id)));
+    }
 }
