@@ -34,6 +34,8 @@ public class AvailabilityController {
             @PathVariable Long id,
             @RequestParam LocalDate date,
             @RequestParam String duration) {
-        return ResponseEntity.ok(availabilityService.getAvailableSlotsForSupervisor(id, date, duration));
+        List<AvailabilitySlotDTO> availableSlots = availabilityService.getAvailableSlotsForSupervisor(id, date,
+                duration);
+        return ResponseEntity.ok(availableSlots);
     }
 }
