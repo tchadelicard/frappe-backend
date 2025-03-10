@@ -32,14 +32,14 @@ public class MeetingRequestController {
 
     @GetMapping("/{id}/actions")
     public ResponseEntity<ActionDTO> getAction(@PathVariable Long id) {
-        ActionDTO actionDTO = meetingRequestService.getAction(id);
+        ActionDTO actionDTO = meetingRequestService.toActionDTO(meetingRequestService.getAction(id));
         return ResponseEntity.ok(actionDTO);
     }
 
     @Transactional
     @PostMapping("/{id}/actions")
     public ResponseEntity<ActionDTO> createAction(@PathVariable Long id, @RequestBody ActionDTO action) {
-        ActionDTO actionDTO = meetingRequestService.createAction(id, action);
+        ActionDTO actionDTO = meetingRequestService.toActionDTO(meetingRequestService.createAction(id, action));
         return ResponseEntity.ok(actionDTO);
     }
 }
