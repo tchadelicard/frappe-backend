@@ -26,7 +26,8 @@ public class MeetingRequestController {
     @PostMapping
     public ResponseEntity<MeetingRequestDTO> createMeetingRequest(
             @Valid @RequestBody CreateMeetingRequestRequest request) throws MessagingException, IOException {
-        MeetingRequestDTO meetingRequestDTO = meetingRequestService.createMeetingRequest(request);
+        MeetingRequestDTO meetingRequestDTO = meetingRequestService
+                .toDTO(meetingRequestService.createMeetingRequest(request));
         return ResponseEntity.ok(meetingRequestDTO);
     }
 

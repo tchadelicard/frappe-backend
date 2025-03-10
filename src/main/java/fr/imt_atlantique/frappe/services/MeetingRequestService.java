@@ -61,7 +61,7 @@ public class MeetingRequestService {
         return modelMapper.map(action, ActionDTO.class);
     }
 
-    public MeetingRequestDTO createMeetingRequest(CreateMeetingRequestRequest request)
+    public MeetingRequest createMeetingRequest(CreateMeetingRequestRequest request)
             throws MessagingException, IOException {
         validateMeetingRequest(request);
 
@@ -86,7 +86,7 @@ public class MeetingRequestService {
 
         eventPublisher.publishEvent(new MeetingRequestCreatedEvent(meetingRequest));
 
-        return modelMapper.map(meetingRequest, MeetingRequestDTO.class);
+        return meetingRequest;
     }
 
     private void validateMeetingRequest(CreateMeetingRequestRequest request) {
