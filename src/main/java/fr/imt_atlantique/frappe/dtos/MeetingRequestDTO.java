@@ -1,10 +1,8 @@
 package fr.imt_atlantique.frappe.dtos;
 
-import fr.imt_atlantique.frappe.entities.Student;
-import fr.imt_atlantique.frappe.entities.Supervisor;
-import lombok.Data;
-
 import java.time.LocalDateTime;
+
+import lombok.Data;
 
 @Data
 public class MeetingRequestDTO {

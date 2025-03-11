@@ -1,10 +1,11 @@
 package fr.imt_atlantique.frappe.dtos;
 
+import org.hibernate.validator.constraints.URL;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
-import org.hibernate.validator.constraints.URL;
 
 @Data
 public class UpdateSupervisorRequest {

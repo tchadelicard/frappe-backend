@@ -1,16 +1,22 @@
 package fr.imt_atlantique.frappe.controllers;
 
+import java.io.IOException;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import fr.imt_atlantique.frappe.dtos.ActionDTO;
 import fr.imt_atlantique.frappe.dtos.CreateMeetingRequestRequest;
 import fr.imt_atlantique.frappe.dtos.MeetingRequestDTO;
 import fr.imt_atlantique.frappe.services.MeetingRequestService;
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
-
-import java.io.IOException;
 
 @RestController
 @RequestMapping("/meeting-requests")

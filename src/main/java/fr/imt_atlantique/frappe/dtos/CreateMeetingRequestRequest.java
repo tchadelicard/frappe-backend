@@ -1,9 +1,9 @@
 package fr.imt_atlantique.frappe.dtos;
 
+import java.time.LocalDateTime;
+
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
-
-import java.time.LocalDateTime;
 
 @Data
 public class CreateMeetingRequestRequest {

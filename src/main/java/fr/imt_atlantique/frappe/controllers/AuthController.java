@@ -1,15 +1,24 @@
 package fr.imt_atlantique.frappe.controllers;
 
-import fr.imt_atlantique.frappe.dtos.*;
-import fr.imt_atlantique.frappe.services.AuthService;
-import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+import fr.imt_atlantique.frappe.dtos.ChangePasswordRequest;
+import fr.imt_atlantique.frappe.dtos.ChangePasswordResponse;
+import fr.imt_atlantique.frappe.dtos.LoginRequest;
+import fr.imt_atlantique.frappe.dtos.LoginResponse;
+import fr.imt_atlantique.frappe.dtos.RegistrationRequest;
+import fr.imt_atlantique.frappe.dtos.RegistrationResponse;
+import fr.imt_atlantique.frappe.dtos.ResendRequest;
+import fr.imt_atlantique.frappe.dtos.ResendResponse;
+import fr.imt_atlantique.frappe.dtos.VerifyRequest;
+import fr.imt_atlantique.frappe.dtos.VerifyResponse;
+import fr.imt_atlantique.frappe.services.AuthService;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
@@ -58,7 +67,7 @@ public class AuthController {
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
-    
+
     @PostMapping("/change-password")
     public ResponseEntity<ChangePasswordResponse> changePassword(@RequestBody ChangePasswordRequest request) {
         ChangePasswordResponse response = authService.changePassword(request);
@@ -68,6 +77,4 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
- 
-    
 }
