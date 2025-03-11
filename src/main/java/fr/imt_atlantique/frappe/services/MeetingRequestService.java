@@ -1,5 +1,15 @@
 package fr.imt_atlantique.frappe.services;
 
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Service;
+
 import fr.imt_atlantique.frappe.dtos.ActionDTO;
 import fr.imt_atlantique.frappe.dtos.AvailabilitySlotDTO;
 import fr.imt_atlantique.frappe.dtos.CreateMeetingRequestRequest;
@@ -10,17 +20,8 @@ import fr.imt_atlantique.frappe.entities.Student;
 import fr.imt_atlantique.frappe.entities.Supervisor;
 import fr.imt_atlantique.frappe.events.MeetingRequestCreatedEvent;
 import fr.imt_atlantique.frappe.repositories.MeetingRequestRepository;
-import jakarta.mail.*;
+import jakarta.mail.MessagingException;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.stereotype.Service;
-
-import java.io.IOException;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
 
 @Service
 @Slf4j

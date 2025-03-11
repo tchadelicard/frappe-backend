@@ -1,5 +1,13 @@
 package fr.imt_atlantique.frappe.services;
 
+import java.security.Principal;
+import java.util.List;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import fr.imt_atlantique.frappe.dtos.StudentDTO;
 import fr.imt_atlantique.frappe.dtos.StudentUpdateRequest;
 import fr.imt_atlantique.frappe.entities.Campus;
@@ -8,13 +16,6 @@ import fr.imt_atlantique.frappe.entities.MeetingRequest;
 import fr.imt_atlantique.frappe.entities.Student;
 import fr.imt_atlantique.frappe.exceptions.StudentNotFoundException;
 import fr.imt_atlantique.frappe.repositories.StudentRepository;
-import org.modelmapper.ModelMapper;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.security.Principal;
-import java.util.List;
 
 @Service
 public class StudentService {

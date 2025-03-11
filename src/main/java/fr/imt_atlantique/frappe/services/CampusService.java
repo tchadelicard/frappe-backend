@@ -1,13 +1,14 @@
 package fr.imt_atlantique.frappe.services;
 
+import java.util.List;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
+
 import fr.imt_atlantique.frappe.dtos.CampusDTO;
 import fr.imt_atlantique.frappe.entities.Campus;
 import fr.imt_atlantique.frappe.exceptions.CampusNotFoundException;
 import fr.imt_atlantique.frappe.repositories.CampusRepository;
-import org.modelmapper.ModelMapper;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class CampusService {

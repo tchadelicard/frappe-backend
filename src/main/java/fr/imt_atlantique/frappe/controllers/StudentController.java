@@ -1,5 +1,16 @@
 package fr.imt_atlantique.frappe.controllers;
 
+import java.security.Principal;
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import fr.imt_atlantique.frappe.dtos.MeetingRequestDTO;
 import fr.imt_atlantique.frappe.dtos.StudentDTO;
 import fr.imt_atlantique.frappe.dtos.StudentUpdateRequest;
@@ -7,12 +18,6 @@ import fr.imt_atlantique.frappe.services.MeetingRequestService;
 import fr.imt_atlantique.frappe.services.StudentService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
-
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.security.Principal;
-import java.util.List;
 
 @RestController
 @RequestMapping("/students")

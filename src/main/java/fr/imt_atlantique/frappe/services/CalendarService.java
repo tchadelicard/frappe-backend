@@ -1,25 +1,5 @@
 package fr.imt_atlantique.frappe.services;
 
-import fr.imt_atlantique.frappe.entities.MeetingRequest;
-import fr.imt_atlantique.frappe.events.MeetingRequestCreatedEvent;
-import fr.imt_atlantique.frappe.events.MeetingRequestResponseEvent;
-import jakarta.mail.MessagingException;
-import lombok.extern.slf4j.Slf4j;
-import net.fortuna.ical4j.data.CalendarBuilder;
-import net.fortuna.ical4j.model.*;
-import net.fortuna.ical4j.model.component.VAlarm;
-import net.fortuna.ical4j.model.component.VEvent;
-import net.fortuna.ical4j.model.component.VTimeZone;
-import net.fortuna.ical4j.model.parameter.Cn;
-
-import net.fortuna.ical4j.model.parameter.PartStat;
-import net.fortuna.ical4j.model.parameter.Role;
-import net.fortuna.ical4j.model.parameter.Rsvp;
-import net.fortuna.ical4j.model.property.*;
-
-import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Service;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Duration;
@@ -29,6 +9,39 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Service;
+
+import fr.imt_atlantique.frappe.entities.MeetingRequest;
+import fr.imt_atlantique.frappe.events.MeetingRequestCreatedEvent;
+import fr.imt_atlantique.frappe.events.MeetingRequestResponseEvent;
+import jakarta.mail.MessagingException;
+import lombok.extern.slf4j.Slf4j;
+import net.fortuna.ical4j.data.CalendarBuilder;
+import net.fortuna.ical4j.model.Calendar;
+import net.fortuna.ical4j.model.Component;
+import net.fortuna.ical4j.model.TimeZoneRegistry;
+import net.fortuna.ical4j.model.TimeZoneRegistryFactory;
+import net.fortuna.ical4j.model.component.VAlarm;
+import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.component.VTimeZone;
+import net.fortuna.ical4j.model.parameter.Cn;
+import net.fortuna.ical4j.model.parameter.PartStat;
+import net.fortuna.ical4j.model.parameter.Role;
+import net.fortuna.ical4j.model.parameter.Rsvp;
+import net.fortuna.ical4j.model.property.Action;
+import net.fortuna.ical4j.model.property.Attendee;
+import net.fortuna.ical4j.model.property.Clazz;
+import net.fortuna.ical4j.model.property.Description;
+import net.fortuna.ical4j.model.property.LastModified;
+import net.fortuna.ical4j.model.property.Method;
+import net.fortuna.ical4j.model.property.Organizer;
+import net.fortuna.ical4j.model.property.ProdId;
+import net.fortuna.ical4j.model.property.Sequence;
+import net.fortuna.ical4j.model.property.Status;
+import net.fortuna.ical4j.model.property.Transp;
+import net.fortuna.ical4j.model.property.Trigger;
 
 @Service
 @Slf4j

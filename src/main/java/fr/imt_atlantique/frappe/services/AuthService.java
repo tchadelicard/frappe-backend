@@ -1,23 +1,31 @@
 package fr.imt_atlantique.frappe.services;
 
-import fr.imt_atlantique.frappe.dtos.*;
-import fr.imt_atlantique.frappe.entities.Student;
-import fr.imt_atlantique.frappe.repositories.StudentRepository;
-import fr.imt_atlantique.frappe.entities.User;
-import fr.imt_atlantique.frappe.repositories.UserRepository;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.regex.Pattern;
+
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.regex.Pattern;
+import fr.imt_atlantique.frappe.dtos.ChangePasswordRequest;
+import fr.imt_atlantique.frappe.dtos.ChangePasswordResponse;
+import fr.imt_atlantique.frappe.dtos.LoginRequest;
+import fr.imt_atlantique.frappe.dtos.LoginResponse;
+import fr.imt_atlantique.frappe.dtos.RegistrationRequest;
+import fr.imt_atlantique.frappe.dtos.RegistrationResponse;
+import fr.imt_atlantique.frappe.dtos.ResendResponse;
+import fr.imt_atlantique.frappe.dtos.VerifyResponse;
+import fr.imt_atlantique.frappe.entities.Student;
+import fr.imt_atlantique.frappe.entities.User;
+import fr.imt_atlantique.frappe.repositories.StudentRepository;
+import fr.imt_atlantique.frappe.repositories.UserRepository;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 
 @Service
 public class AuthService {
@@ -28,8 +36,9 @@ public class AuthService {
     private final JwtService jwtService;
     private final StudentRepository studentRepository;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JavaMailSender mailSender, JwtService jwtService,
-                       StudentRepository studentRepository) {
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JavaMailSender mailSender,
+            JwtService jwtService,
+            StudentRepository studentRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.mailSender = mailSender;
@@ -68,7 +77,8 @@ public class AuthService {
     @Transactional
     public LoginResponse login(LoginRequest request) {
         Optional<User> userOptional = userRepository.findByEmail(request.getEmail());
-        if (userOptional.isEmpty() || !passwordEncoder.matches(request.getPassword(), userOptional.get().getPassword())) {
+        if (userOptional.isEmpty()
+                || !passwordEncoder.matches(request.getPassword(), userOptional.get().getPassword())) {
             return LoginResponse.builder()
                     .token(null)
                     .message("Invalid email or password.")
@@ -154,11 +164,12 @@ public class AuthService {
                 .message("Verification code sent successfully.")
                 .build();
     }
-    
+
     @Transactional
     public ChangePasswordResponse changePassword(ChangePasswordRequest request) {
         Optional<User> userOptional = userRepository.findByEmail(request.getEmail());
-        if (userOptional.isEmpty() || !passwordEncoder.matches(request.getPassword(), userOptional.get().getPassword())) {
+        if (userOptional.isEmpty()
+                || !passwordEncoder.matches(request.getPassword(), userOptional.get().getPassword())) {
             return ChangePasswordResponse.builder()
                     .success(false)
                     .message("Invalid email or password.")
@@ -174,7 +185,6 @@ public class AuthService {
                 .message("Password changed successfully.")
                 .build();
     }
-    
 
     private String validateRegistrationRequest(RegistrationRequest request) {
         if (!isValidEmail(request.getEmail())) {

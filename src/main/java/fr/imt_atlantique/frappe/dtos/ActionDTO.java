@@ -1,6 +1,5 @@
 package fr.imt_atlantique.frappe.dtos;
 
-import jakarta.persistence.Column;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

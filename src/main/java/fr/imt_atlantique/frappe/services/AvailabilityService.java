@@ -1,17 +1,18 @@
 package fr.imt_atlantique.frappe.services;
 
-import fr.imt_atlantique.frappe.dtos.AvailabilitySlotDTO;
-import fr.imt_atlantique.frappe.dtos.GetAvailableDaysRequest;
-import fr.imt_atlantique.frappe.dtos.GetAvailableSlotsRequest;
-import fr.imt_atlantique.frappe.entities.Supervisor;
-import fr.imt_atlantique.frappe.exceptions.SupervisorNotFoundException;
+import java.time.LocalDate;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.time.LocalDate;
-import java.util.List;
+import fr.imt_atlantique.frappe.dtos.AvailabilitySlotDTO;
+import fr.imt_atlantique.frappe.dtos.GetAvailableDaysRequest;
+import fr.imt_atlantique.frappe.dtos.GetAvailableSlotsRequest;
+import fr.imt_atlantique.frappe.entities.Supervisor;
+import fr.imt_atlantique.frappe.exceptions.SupervisorNotFoundException;
 
 @Service
 public class AvailabilityService {
