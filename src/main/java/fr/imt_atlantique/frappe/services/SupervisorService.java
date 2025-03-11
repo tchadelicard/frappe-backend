@@ -2,13 +2,12 @@ package fr.imt_atlantique.frappe.services;
 
 import fr.imt_atlantique.frappe.dtos.*;
 import fr.imt_atlantique.frappe.entities.Campus;
+import fr.imt_atlantique.frappe.entities.MeetingRequest;
 import fr.imt_atlantique.frappe.entities.Supervisor;
 import fr.imt_atlantique.frappe.exceptions.SupervisorNotFoundException;
-import fr.imt_atlantique.frappe.repositories.CampusRepository;
 import fr.imt_atlantique.frappe.repositories.SupervisorRepository;
-import fr.imt_atlantique.frappe.repositories.UserRepository;
+
 import org.modelmapper.ModelMapper;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
@@ -16,33 +15,40 @@ import java.util.List;
 
 @Service
 public class SupervisorService {
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final SupervisorRepository supervisorRepository;
     private final ModelMapper modelMapper;
-    private final PasswordEncoder passwordEncoder;
     private final EncryptionService encryptionService;
-    private final CampusRepository campusRepository;
+    private final CampusService campusService;
 
-    public SupervisorService(UserRepository userRepository, SupervisorRepository supervisorRepository,
-            ModelMapper modelMapper, PasswordEncoder passwordEncoder, EncryptionService encryptionService,
-            CampusRepository campusRepository) {
-        this.userRepository = userRepository;
+    public SupervisorService(UserService userService, SupervisorRepository supervisorRepository,
+            ModelMapper modelMapper, EncryptionService encryptionService,
+            CampusService campusService) {
+        this.userService = userService;
         this.supervisorRepository = supervisorRepository;
         this.modelMapper = modelMapper;
-        this.passwordEncoder = passwordEncoder;
         this.encryptionService = encryptionService;
-        this.campusRepository = campusRepository;
+        this.campusService = campusService;
     }
 
-    public List<SupervisorDTO> getSupervisors() {
-        return supervisorRepository
-                .findAll()
-                .stream()
+    public SupervisorDTO toDTO(Supervisor supervisor) {
+        return modelMapper.map(supervisor, SupervisorDTO.class);
+    }
+
+    public List<SupervisorDTO> toDTOs(List<Supervisor> supervisors) {
+        return supervisors.stream()
                 .map(supervisor -> modelMapper.map(supervisor, SupervisorDTO.class))
                 .toList();
     }
 
-    public SupervisorDTO createSupervisor(CreateSupervisorRequest request) {
+    public List<Supervisor> getSupervisors() {
+        return supervisorRepository
+                .findAll()
+                .stream()
+                .toList();
+    }
+
+    public Supervisor createSupervisor(CreateSupervisorRequest request) {
         // Encrypt caldavPassword using EncryptionService
         EncryptionResult encryptionResult;
         try {
@@ -51,23 +57,16 @@ public class SupervisorService {
             throw new RuntimeException("Failed to create supervisor");
         }
 
-        // Validate request
-        userRepository.findByEmail(request.getEmail()).ifPresent(user -> {
-            throw new RuntimeException("Email is already taken.");
-        });
+        userService.ensureUserEmailDoesNotExist(request.getEmail());
+        userService.ensureUserUsernameDoesNotExist(request.getUsername());
 
-        userRepository.findByUsername(request.getUsername()).ifPresent(user -> {
-            throw new RuntimeException("Username is already taken.");
-        });
-
-        Campus campus = campusRepository.findById(request.getCampusId())
-                .orElseThrow(() -> new RuntimeException("Campus does not exist."));
+        Campus campus = campusService.getCampusById(request.getCampusId());
 
         // Create supervisor
         Supervisor supervisor = new Supervisor();
         supervisor.setUsername(request.getUsername());
         supervisor.setEmail(request.getEmail());
-        supervisor.setPassword(passwordEncoder.encode(request.getPassword()));
+        supervisor.setPassword(userService.hashPassword(request.getPassword()));
         supervisor.setFirstName(request.getFirstName());
         supervisor.setLastName(request.getLastName());
         supervisor.setCampus(campus);
@@ -80,38 +79,34 @@ public class SupervisorService {
 
         supervisorRepository.save(supervisor);
 
-        return modelMapper.map(supervisor, SupervisorDTO.class);
+        return supervisor;
     }
 
-    public SupervisorDTO getMe(Principal principal) {
+    public Supervisor getMe(Principal principal) {
         Supervisor supervisor = supervisorRepository.findByUsername(principal.getName())
                 .orElseThrow(() -> new SupervisorNotFoundException("Supervisor not found"));
-        return modelMapper.map(supervisor, SupervisorDTO.class);
+        return supervisor;
     }
 
-    public SupervisorDTO updateMe(Principal principal, UpdateSupervisorRequest request) {
+    public Supervisor updateMe(Principal principal, UpdateSupervisorRequest request) {
         Supervisor supervisor = supervisorRepository.findByUsername(principal.getName())
                 .orElseThrow(() -> new SupervisorNotFoundException("Supervisor not found"));
 
         // Validate username uniqueness if provided and different from the current one
         if (request.getUsername() != null && !request.getUsername().equals(supervisor.getUsername())) {
-            if (userRepository.findByUsername(request.getUsername()).isPresent()) {
-                throw new RuntimeException("Username is already taken.");
-            }
+            userService.ensureUserEmailDoesNotExist(request.getUsername());
             supervisor.setUsername(request.getUsername());
         }
 
         // Validate email uniqueness if provided and different from the current one
         if (request.getEmail() != null && !request.getEmail().equals(supervisor.getEmail())) {
-            if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-                throw new RuntimeException("Email is already taken.");
-            }
+            userService.ensureUserEmailDoesNotExist(request.getEmail());
             supervisor.setEmail(request.getEmail());
         }
 
         // Update password if provided (regex in DTO ensures validity)
         if (request.getPassword() != null) {
-            supervisor.setPassword(passwordEncoder.encode(request.getPassword()));
+            supervisor.setPassword(userService.hashPassword(request.getPassword()));
         }
 
         // Update first name if provided
@@ -126,8 +121,7 @@ public class SupervisorService {
 
         // Update campus if provided
         if (request.getCampusId() != null) {
-            Campus campus = campusRepository.findById(request.getCampusId())
-                    .orElseThrow(() -> new RuntimeException("Campus does not exist."));
+            Campus campus = campusService.getCampusById(request.getCampusId());
             supervisor.setCampus(campus);
         }
 
@@ -147,31 +141,23 @@ public class SupervisorService {
         // Save updated supervisor
         supervisorRepository.save(supervisor);
 
-        return modelMapper.map(supervisor, SupervisorDTO.class);
+        return supervisor;
     }
 
-    public List<MeetingRequestDTO> getMeetingRequests(Long id) {
+    public List<MeetingRequest> getMeetingRequests(Long id) {
         Supervisor supervisor = supervisorRepository.findById(id)
                 .orElseThrow(() -> new SupervisorNotFoundException("Supervisor not found"));
         return supervisor.getMeetingRequests()
                 .stream()
-                .map(meetingRequest -> modelMapper.map(meetingRequest, MeetingRequestDTO.class))
                 .toList();
     }
 
-    public List<MeetingRequestDTO> getMeetingRequests(Principal principal) {
+    public List<MeetingRequest> getMeetingRequests(Principal principal) {
         Supervisor supervisor = supervisorRepository.findByUsername(principal.getName())
                 .orElseThrow(() -> new SupervisorNotFoundException("Supervisor not found"));
         return supervisor.getMeetingRequests()
                 .stream()
-                .map(meetingRequest -> modelMapper.map(meetingRequest, MeetingRequestDTO.class))
                 .toList();
-    }
-
-    public SupervisorDTO getSupervisor(Long id) {
-        Supervisor supervisor = supervisorRepository.findById(id)
-                .orElseThrow(() -> new SupervisorNotFoundException("Supervisor not found"));
-        return modelMapper.map(supervisor, SupervisorDTO.class);
     }
 
     public Supervisor getSupervisorById(Long id) {
