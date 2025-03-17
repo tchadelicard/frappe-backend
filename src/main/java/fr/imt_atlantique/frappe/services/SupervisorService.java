@@ -58,14 +58,6 @@ public class SupervisorService {
     }
 
     public Supervisor createSupervisor(CreateSupervisorRequest request) {
-        // Encrypt caldavPassword using EncryptionService
-        EncryptionResult encryptionResult;
-        try {
-            encryptionResult = encryptionService.encryptAndPrepareData(request.getCaldavPassword());
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to create supervisor");
-        }
-
         userService.ensureUserEmailDoesNotExist(request.getEmail());
         userService.ensureUserUsernameDoesNotExist(request.getUsername());
 
@@ -79,11 +71,6 @@ public class SupervisorService {
         supervisor.setFirstName(request.getFirstName());
         supervisor.setLastName(request.getLastName());
         supervisor.setCampus(campus);
-        supervisor.setMeetingUrl(request.getMeetingUrl());
-        supervisor.setCaldavUsername(request.getCaldavUsername());
-        supervisor.setCaldavPassword(encryptionResult.getEncryptedData()); // Store encrypted password
-        supervisor.setCaldavPasswordSalt(encryptionResult.getSalt()); // Store salt
-        supervisor.setCaldavPasswordIv(encryptionResult.getIv()); // Store IV
         supervisor.setEnabled(true);
 
         supervisorRepository.save(supervisor);
@@ -144,7 +131,15 @@ public class SupervisorService {
         }
 
         if (request.getCaldavPassword() != null) {
-            supervisor.setCaldavPassword(request.getCaldavPassword());
+            try {
+                EncryptionResult encryptionResult = encryptionService
+                        .encryptAndPrepareData(request.getCaldavPassword());
+                supervisor.setCaldavPassword(encryptionResult.getEncryptedData());
+                supervisor.setCaldavPasswordIv(encryptionResult.getIv());
+                supervisor.setCaldavPasswordSalt(encryptionResult.getSalt());
+            } catch (Exception e) {
+                throw new RuntimeException("Error encrypting password");
+            }
         }
 
         // Save updated supervisor

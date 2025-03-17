@@ -7,9 +7,9 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import fr.imt_atlantique.frappe.dtos.RegistrationRequest;
+import fr.imt_atlantique.frappe.dtos.CreateUpdateUserRequest;
 import fr.imt_atlantique.frappe.dtos.StudentDTO;
-import fr.imt_atlantique.frappe.dtos.StudentUpdateRequest;
+import fr.imt_atlantique.frappe.dtos.UpdateStudentRequest;
 import fr.imt_atlantique.frappe.entities.Campus;
 import fr.imt_atlantique.frappe.entities.CreditTransfer;
 import fr.imt_atlantique.frappe.entities.MeetingRequest;
@@ -53,7 +53,7 @@ public class StudentService {
                 .orElseThrow(() -> new StudentNotFoundException("Student not found"));
     }
 
-    public Student createStudent(RegistrationRequest request) {
+    public Student createStudent(CreateUpdateUserRequest request) {
         Student student = new Student();
         student.setUsername(request.getUsername());
         student.setPassword(userService.hashPassword(request.getPassword()));
@@ -68,7 +68,7 @@ public class StudentService {
     }
 
     @Transactional
-    public Student updateMe(StudentUpdateRequest request, Principal principal) {
+    public Student updateMe(UpdateStudentRequest request, Principal principal) {
         Student student = studentRepository.findByUsername(principal.getName())
                 .orElseThrow(() -> new StudentNotFoundException("Student not found"));
         if (request.getPassword() != null) {
