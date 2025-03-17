@@ -7,9 +7,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import fr.imt_atlantique.frappe.dtos.CreateUpdateUserRequest;
 import fr.imt_atlantique.frappe.dtos.LoginRequest;
 import fr.imt_atlantique.frappe.dtos.LoginResponse;
-import fr.imt_atlantique.frappe.dtos.RegistrationRequest;
 import fr.imt_atlantique.frappe.dtos.ResendRequest;
 import fr.imt_atlantique.frappe.dtos.VerifyRequest;
 import fr.imt_atlantique.frappe.services.AuthService;
@@ -28,7 +28,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@Valid @RequestBody RegistrationRequest request) {
+    public ResponseEntity<String> register(@Valid @RequestBody CreateUpdateUserRequest request) {
         authService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body("User registered successfully. Please verify your email.");
