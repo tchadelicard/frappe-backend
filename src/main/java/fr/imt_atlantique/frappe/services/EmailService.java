@@ -45,6 +45,9 @@ public class EmailService {
     @Value("${frappe.mail.from}")
     private String from;
 
+    @Value("${frappe.frontend.url}")
+    private String frontendUrl;
+
     private final JavaMailSender mailSender;
     private final ApplicationEventPublisher eventPublisher;
 
@@ -57,12 +60,23 @@ public class EmailService {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
             helper.setFrom(from);
             helper.setTo(user.getEmail());
             helper.setSubject("Verify Your Account");
-            helper.setText("Validation code: " + user.getValidationCode());
+
+            String verificationUrl = frontendUrl + "/verify-email?token=" + user.getValidationCode();
+
+            String emailContent = "<p>Hello " + user.getFirstName() + ",</p>"
+                    + "<p>Thank you for registering. Click the link below to verify your account:</p>"
+                    + "<p><a href='" + verificationUrl
+                    + "' style='color: blue; font-weight: bold;'>Verify My Account</a></p>"
+                    + "<p>If you did not request this, please ignore this email.</p>";
+
+            helper.setText(emailContent, true);
+
             mailSender.send(message);
-            log.info("Validation code sent successfully!");
+            log.info("Validation email sent successfully to {}", user.getEmail());
         } catch (MessagingException e) {
             throw new FailedToSendEmailException("Error sending verification email.");
         }

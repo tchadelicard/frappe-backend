@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import fr.imt_atlantique.frappe.dtos.MeetingRequestDTO;
 import fr.imt_atlantique.frappe.dtos.StudentDTO;
-import fr.imt_atlantique.frappe.dtos.StudentUpdateRequest;
+import fr.imt_atlantique.frappe.dtos.UpdateStudentRequest;
 import fr.imt_atlantique.frappe.services.MeetingRequestService;
 import fr.imt_atlantique.frappe.services.StudentService;
 import jakarta.validation.Valid;
@@ -50,7 +50,7 @@ public class StudentController {
     }
 
     @PatchMapping("/me")
-    public ResponseEntity<StudentDTO> updateMe(@Valid @RequestBody StudentUpdateRequest request, Principal principal) {
+    public ResponseEntity<StudentDTO> updateMe(@Valid @RequestBody UpdateStudentRequest request, Principal principal) {
         StudentDTO student = studentService.toDTO(studentService.updateMe(request, principal));
         return ResponseEntity.ok(student);
     }

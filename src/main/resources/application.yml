@@ -16,11 +16,11 @@ spring:
     username: ${FRAPPE_MAIL_USERNAME}
     password: ${FRAPPE_MAIL_PASSWORD}
     properties:
-        mail:
-            smtp:
-              auth: true
-              starttls:
-                  enable: true
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 server:
   servlet:
     context-path: /api/v1
@@ -36,4 +36,6 @@ frappe:
       secret-key: ${FRAPPE_ENCRYPTION_SECRET_KEY}
   availability:
     api:
-        url: ${FRAPPE_AVAILABILITY_API_URL}
+      url: ${FRAPPE_AVAILABILITY_API_URL}
+  frontend:
+    url: ${FRAPPE_FRONTEND_URL}
