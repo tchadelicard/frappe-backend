@@ -1,16 +1,13 @@
 package fr.imt_atlantique.frappe.dtos;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.EqualsAndHashCode;
 
 @Data
-@NoArgsConstructor
-public class UserDTO {
-    private Long id;
+@EqualsAndHashCode(callSuper = true)
+public class UserDTO extends MinimalUserDTO {
     private String username;
     private String email;
-    private String firstName;
-    private String lastName;
     private String phoneNumber;
     private Long campusId;
 }

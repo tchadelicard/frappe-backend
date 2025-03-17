@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import fr.imt_atlantique.frappe.dtos.CreateSupervisorRequest;
 import fr.imt_atlantique.frappe.dtos.EncryptionResult;
+import fr.imt_atlantique.frappe.dtos.MinimalUserDTO;
 import fr.imt_atlantique.frappe.dtos.SupervisorDTO;
 import fr.imt_atlantique.frappe.dtos.UpdateSupervisorRequest;
 import fr.imt_atlantique.frappe.entities.Campus;
@@ -34,13 +35,18 @@ public class SupervisorService {
         this.campusService = campusService;
     }
 
-    public SupervisorDTO toDTO(Supervisor supervisor) {
+    public MinimalUserDTO toDTO(Supervisor supervisor) {
+        List<String> roles = userService.getUserRoles();
+
+        if (roles.contains("ROLE_STUDENT"))
+            return modelMapper.map(supervisor, MinimalUserDTO.class);
+
         return modelMapper.map(supervisor, SupervisorDTO.class);
     }
 
-    public List<SupervisorDTO> toDTOs(List<Supervisor> supervisors) {
+    public List<MinimalUserDTO> toDTOs(List<Supervisor> supervisors) {
         return supervisors.stream()
-                .map(supervisor -> modelMapper.map(supervisor, SupervisorDTO.class))
+                .map(supervisor -> toDTO(supervisor))
                 .toList();
     }
 
