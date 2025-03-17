@@ -6,6 +6,7 @@ import lombok.Data;
 
 @Data
 public class MeetingRequestDTO {
+    private Long id;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
     private String theme;
