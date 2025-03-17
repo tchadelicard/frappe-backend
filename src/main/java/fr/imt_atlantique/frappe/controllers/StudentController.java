@@ -31,6 +31,12 @@ public class StudentController {
         this.meetingRequestService = meetingRequestService;
     }
 
+    @GetMapping
+    public ResponseEntity<List<StudentDTO>> getStudents() {
+        List<StudentDTO> students = studentService.toDTOs(studentService.getStudents());
+        return ResponseEntity.ok(students);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<StudentDTO> getStudent(@Valid @PathVariable @Min(1) Long id) {
         StudentDTO student = studentService.toDTO(studentService.getStudentById(id));
