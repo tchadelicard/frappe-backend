@@ -44,6 +44,10 @@ public class StudentService {
                 .toList();
     }
 
+    public List<Student> getStudents() {
+        return studentRepository.findAll();
+    }
+
     public Student getMe(Principal principal) {
         return studentRepository.findByUsername(principal.getName())
                 .orElseThrow(() -> new StudentNotFoundException("Student not found"));
