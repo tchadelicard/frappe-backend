@@ -6,9 +6,9 @@ import java.util.function.Function;
 import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import fr.imt_atlantique.frappe.entities.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -22,7 +22,7 @@ public class JwtService {
     @Value("${frappe.security.jwt.expiration-time}")
     private long jwtExpiration;
 
-    public String extractUsername(String token) {
+    public String extractEmail(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
@@ -31,8 +31,8 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
-    public String generateToken(UserDetails userDetails) {
-        return buildToken(userDetails, jwtExpiration);
+    public String generateToken(User user) {
+        return buildToken(user, jwtExpiration);
     }
 
     public long getExpirationTime() {
@@ -40,20 +40,20 @@ public class JwtService {
     }
 
     private String buildToken(
-            UserDetails userDetails,
+            User user,
             long expiration) {
         return Jwts
                 .builder()
-                .subject(userDetails.getUsername())
+                .subject(user.getEmail())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSignInKey())
                 .compact();
     }
 
-    public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+    public boolean isTokenValid(String token, User user) {
+        final String email = extractEmail(token);
+        return (email.equals(user.getEmail())) && !isTokenExpired(token);
     }
 
     private boolean isTokenExpired(String token) {

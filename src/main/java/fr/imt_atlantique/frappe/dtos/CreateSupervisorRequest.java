@@ -2,6 +2,7 @@ package fr.imt_atlantique.frappe.dtos;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
@@ -24,14 +25,13 @@ public class CreateSupervisorRequest {
     @NotBlank(message = "Last name is mandatory")
     private String lastName;
 
-    @NotBlank(message = "Campus ID is mandatory")
+    @NotNull(message = "Campus ID is mandatory")
     private Long campusId;
 
     @NotBlank(message = "Meeting URL is mandatory")
     private String meetingUrl;
 
     @NotBlank(message = "CalDAV username is mandatory")
-    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$", message = "Password must contain at least 8 characters, one digit, one lowercase letter, one uppercase letter and one special character")
     private String caldavUsername;
 
     @NotBlank(message = "CalDAV password is mandatory")

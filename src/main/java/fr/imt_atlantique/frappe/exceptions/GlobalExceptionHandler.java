@@ -4,9 +4,12 @@ import jakarta.validation.ConstraintViolationException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @ControllerAdvice
@@ -22,9 +25,18 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body("Validation failed: " + ex.getMessage());
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException ex) {
-        return ResponseEntity.badRequest().body("Bad request: " + ex.getMessage());
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        Map<String, Object> errors = new LinkedHashMap<>();
+        errors.put("error", "Validation failed");
+
+        Map<String, String> fieldErrors = new LinkedHashMap<>();
+        for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
+            fieldErrors.put(fieldError.getField(), fieldError.getDefaultMessage());
+        }
+        errors.put("details", fieldErrors);
+
+        return ResponseEntity.badRequest().body(errors);
     }
 
     @ExceptionHandler(ApplicationException.class)
