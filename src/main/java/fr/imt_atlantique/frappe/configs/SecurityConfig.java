@@ -2,6 +2,8 @@ package fr.imt_atlantique.frappe.configs;
 
 import fr.imt_atlantique.frappe.filters.JwtAuthFilter;
 import fr.imt_atlantique.frappe.repositories.UserRepository;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -28,6 +30,9 @@ public class SecurityConfig {
 
     private final UserRepository userRepository;
 
+    @Value("${frappe.frontend.url}")
+    private String frontendUrl;
+
     public SecurityConfig(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
@@ -35,7 +40,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+        configuration.setAllowedOrigins(List.of(frontendUrl));
         configuration.setAllowedMethods(List.of("*"));
         configuration.setAllowedHeaders(List.of("*"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
