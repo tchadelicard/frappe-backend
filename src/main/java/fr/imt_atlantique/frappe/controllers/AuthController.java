@@ -7,17 +7,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import fr.imt_atlantique.frappe.dtos.ChangePasswordRequest;
-import fr.imt_atlantique.frappe.dtos.ChangePasswordResponse;
 import fr.imt_atlantique.frappe.dtos.LoginRequest;
 import fr.imt_atlantique.frappe.dtos.LoginResponse;
 import fr.imt_atlantique.frappe.dtos.RegistrationRequest;
-import fr.imt_atlantique.frappe.dtos.RegistrationResponse;
 import fr.imt_atlantique.frappe.dtos.ResendRequest;
-import fr.imt_atlantique.frappe.dtos.ResendResponse;
 import fr.imt_atlantique.frappe.dtos.VerifyRequest;
-import fr.imt_atlantique.frappe.dtos.VerifyResponse;
 import fr.imt_atlantique.frappe.services.AuthService;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -32,13 +28,10 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<RegistrationResponse> register(@RequestBody RegistrationRequest request) {
-        log.info("Received registration request: {}");
-        RegistrationResponse response = authService.register(request);
-        if (response.isSuccess()) {
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    public ResponseEntity<String> register(@Valid @RequestBody RegistrationRequest request) {
+        authService.register(request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body("User registered successfully. Please verify your email.");
     }
 
     @PostMapping("/login")
@@ -51,30 +44,14 @@ public class AuthController {
     }
 
     @PostMapping("/verify")
-    public ResponseEntity<VerifyResponse> verifyAccount(@RequestBody VerifyRequest request) {
-        VerifyResponse response = authService.verifyAccount(request.getToken());
-        if (response.isSuccess()) {
-            return ResponseEntity.ok(response);
-        }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    public ResponseEntity<String> verifyAccount(@RequestBody VerifyRequest request) {
+        authService.verifyAccount(request.getToken());
+        return ResponseEntity.ok("Account verified successfully");
     }
 
     @PostMapping("/resend")
-    public ResponseEntity<ResendResponse> resendVerificationCode(@RequestBody ResendRequest request) {
-        ResendResponse response = authService.resendVerificationCode(request.getEmail());
-        if (response.isSuccess()) {
-            return ResponseEntity.ok(response);
-        }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    public ResponseEntity<String> resendVerificationCode(@RequestBody ResendRequest request) {
+        authService.resendVerificationCode(request.getEmail());
+        return ResponseEntity.ok("Verification code resent successfully");
     }
-
-    @PostMapping("/change-password")
-    public ResponseEntity<ChangePasswordResponse> changePassword(@RequestBody ChangePasswordRequest request) {
-        ChangePasswordResponse response = authService.changePassword(request);
-        if (response.isSuccess()) {
-            return ResponseEntity.ok(response);
-        }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-    }
-
 }
