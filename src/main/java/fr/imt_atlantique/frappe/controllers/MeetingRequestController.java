@@ -28,7 +28,6 @@ public class MeetingRequestController {
         this.meetingRequestService = meetingRequestService;
     }
 
-    @Transactional
     @PostMapping
     public ResponseEntity<MeetingRequestDTO> createMeetingRequest(
             @Valid @RequestBody CreateMeetingRequestRequest request) throws MessagingException, IOException {
@@ -43,7 +42,6 @@ public class MeetingRequestController {
         return ResponseEntity.ok(actionDTO);
     }
 
-    @Transactional
     @PostMapping("/{id}/actions")
     public ResponseEntity<ActionDTO> createAction(@PathVariable Long id, @RequestBody ActionDTO action) {
         ActionDTO actionDTO = meetingRequestService.toActionDTO(meetingRequestService.createAction(id, action));

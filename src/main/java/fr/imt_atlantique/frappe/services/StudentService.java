@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import fr.imt_atlantique.frappe.dtos.CreateUpdateUserRequest;
 import fr.imt_atlantique.frappe.dtos.StudentDTO;
@@ -67,7 +66,6 @@ public class StudentService {
         return student;
     }
 
-    @Transactional
     public Student updateMe(UpdateStudentRequest request, Principal principal) {
         Student student = studentRepository.findByUsername(principal.getName())
                 .orElseThrow(() -> new StudentNotFoundException("Student not found"));
