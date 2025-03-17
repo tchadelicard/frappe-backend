@@ -3,6 +3,7 @@ package fr.imt_atlantique.frappe.controllers;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,8 +28,8 @@ public class AvailabilityController {
     public ResponseEntity<List<LocalDate>> getAvailableDaysForSupervisor(
             @PathVariable Long id,
             @RequestParam String duration,
-            @RequestParam LocalDate startDate,
-            @RequestParam LocalDate endDate) {
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
         List<LocalDate> availableDays = availabilityService.getAvailableDaysForSupervisor(id, duration, startDate,
                 endDate);
         return ResponseEntity.ok(availableDays);
@@ -37,7 +38,7 @@ public class AvailabilityController {
     @GetMapping("/{id}/slots")
     public ResponseEntity<List<AvailabilitySlotDTO>> getAvailableSlotsForSupervisor(
             @PathVariable Long id,
-            @RequestParam LocalDate date,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @RequestParam String duration) {
         List<AvailabilitySlotDTO> availableSlots = availabilityService.getAvailableSlotsForSupervisor(id, date,
                 duration);

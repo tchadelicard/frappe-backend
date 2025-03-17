@@ -3,11 +3,9 @@ package fr.imt_atlantique.frappe.dtos;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import lombok.Builder;
 import lombok.Data;
 
 @Data
-@Builder
 public class RegistrationRequest {
     @NotBlank
     private String username;

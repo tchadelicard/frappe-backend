@@ -97,7 +97,7 @@ public class EmailService {
         log.info("Meeting invitation sent successfully!");
     }
 
-    @Scheduled(fixedRate = 50000) // Runs every 5 seconds
+    @Scheduled(fixedRate = 600000) // Runs every 5 seconds
     public void checkMeetingResponses() {
         log.info("📨 Checking for new meeting responses...");
         Properties properties = new Properties();
