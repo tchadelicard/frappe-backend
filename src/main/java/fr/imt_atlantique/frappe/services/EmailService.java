@@ -14,7 +14,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import fr.imt_atlantique.frappe.entities.MeetingRequest;
+import fr.imt_atlantique.frappe.entities.User;
 import fr.imt_atlantique.frappe.events.MeetingRequestResponseEvent;
+import fr.imt_atlantique.frappe.exceptions.FailedToSendEmailException;
 import jakarta.mail.BodyPart;
 import jakarta.mail.Flags;
 import jakarta.mail.Folder;
@@ -49,6 +51,21 @@ public class EmailService {
     public EmailService(JavaMailSender mailSender, ApplicationEventPublisher eventPublisher) {
         this.mailSender = mailSender;
         this.eventPublisher = eventPublisher;
+    }
+
+    public void sendVerificationEmail(User user) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            helper.setFrom(from);
+            helper.setTo(user.getEmail());
+            helper.setSubject("Verify Your Account");
+            helper.setText("Validation code: " + user.getValidationCode());
+            mailSender.send(message);
+            log.info("Validation code sent successfully!");
+        } catch (MessagingException e) {
+            throw new FailedToSendEmailException("Error sending verification email.");
+        }
     }
 
     public void sendMeetingInvitation(MeetingRequest meetingRequest, String ics)

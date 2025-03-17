@@ -4,10 +4,10 @@ import java.security.Principal;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import fr.imt_atlantique.frappe.dtos.RegistrationRequest;
 import fr.imt_atlantique.frappe.dtos.StudentDTO;
 import fr.imt_atlantique.frappe.dtos.StudentUpdateRequest;
 import fr.imt_atlantique.frappe.entities.Campus;
@@ -20,19 +20,18 @@ import fr.imt_atlantique.frappe.repositories.StudentRepository;
 @Service
 public class StudentService {
     private final StudentRepository studentRepository;
+    private final UserService userService;
     private final ModelMapper modelMapper;
     private final CampusService campusService;
     private final CreditTransferService creditTransferService;
-    private final PasswordEncoder passwordEncoder;
 
-    public StudentService(StudentRepository studentRepository, ModelMapper modelMapper,
-            CampusService campusService, CreditTransferService creditTransferService,
-            PasswordEncoder passwordEncoder) {
+    public StudentService(StudentRepository studentRepository, UserService userService, ModelMapper modelMapper,
+            CampusService campusService, CreditTransferService creditTransferService) {
         this.studentRepository = studentRepository;
+        this.userService = userService;
         this.modelMapper = modelMapper;
         this.campusService = campusService;
         this.creditTransferService = creditTransferService;
-        this.passwordEncoder = passwordEncoder;
     }
 
     public StudentDTO toDTO(Student student) {
@@ -50,12 +49,26 @@ public class StudentService {
                 .orElseThrow(() -> new StudentNotFoundException("Student not found"));
     }
 
+    public Student createStudent(RegistrationRequest request) {
+        Student student = new Student();
+        student.setUsername(request.getUsername());
+        student.setPassword(userService.hashPassword(request.getPassword()));
+        student.setFirstName(request.getFirstName());
+        student.setLastName(request.getLastName());
+        student.setEmail(request.getEmail());
+        student.setEnabled(false);
+        userService.checkIfUserExists(student);
+        userService.generateValidationCode(student);
+        studentRepository.save(student);
+        return student;
+    }
+
     @Transactional
     public Student updateMe(StudentUpdateRequest request, Principal principal) {
         Student student = studentRepository.findByUsername(principal.getName())
                 .orElseThrow(() -> new StudentNotFoundException("Student not found"));
         if (request.getPassword() != null) {
-            student.setPassword(passwordEncoder.encode(request.getPassword()));
+            student.setPassword(userService.hashPassword(request.getPassword()));
         }
         if (request.getFirstName() != null) {
             student.setFirstName(request.getFirstName());

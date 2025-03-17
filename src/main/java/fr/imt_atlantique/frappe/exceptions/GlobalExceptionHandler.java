@@ -1,6 +1,8 @@
 package fr.imt_atlantique.frappe.exceptions;
 
 import jakarta.validation.ConstraintViolationException;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -25,14 +27,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body("Bad request: " + ex.getMessage());
     }
 
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Map<String, String>> handleRuntimeException(ApplicationException ex) {
-        return ResponseEntity.badRequest()
+    @ExceptionHandler(ApplicationException.class)
+    public ResponseEntity<Map<String, String>> handleApplicationExceptions(ApplicationException ex) {
+        return ResponseEntity.internalServerError()
                 .body(Map.of("error", ex.getClass().getSimpleName(), "details", ex.getMessage()));
     }
 
-    @ExceptionHandler(ApplicationException.class)
-    public ResponseEntity<Map<String, String>> handleApplicationExceptions(ApplicationException ex) {
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<Map<String, String>> handleRuntimeException(ApplicationException ex) {
         return ResponseEntity.badRequest()
                 .body(Map.of("error", ex.getClass().getSimpleName(), "details", ex.getMessage()));
     }
@@ -40,5 +42,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<String> handleNotFoundException(NotFoundException ex) {
         return ResponseEntity.notFound().build();
+    }
+
+    @ExceptionHandler(ValidationCodeNotFoundException.class)
+    public ResponseEntity<String> handleUserUnauthorizedException(ValidationCodeNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
     }
 }
