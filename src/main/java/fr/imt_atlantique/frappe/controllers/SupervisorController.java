@@ -64,7 +64,6 @@ public class SupervisorController {
         return ResponseEntity.ok(supervisor);
     }
 
-    @Transactional
     @PatchMapping("/me")
     public ResponseEntity<MinimalUserDTO> updateMe(Principal principal,
             @Valid @RequestBody UpdateSupervisorRequest request) {
