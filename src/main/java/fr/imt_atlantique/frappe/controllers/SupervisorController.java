@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import fr.imt_atlantique.frappe.dtos.CreateSupervisorRequest;
 import fr.imt_atlantique.frappe.dtos.MeetingRequestDTO;
-import fr.imt_atlantique.frappe.dtos.SupervisorDTO;
+import fr.imt_atlantique.frappe.dtos.MinimalUserDTO;
 import fr.imt_atlantique.frappe.dtos.UpdateSupervisorRequest;
 import fr.imt_atlantique.frappe.services.MeetingRequestService;
 import fr.imt_atlantique.frappe.services.SupervisorService;
@@ -34,20 +34,20 @@ public class SupervisorController {
     }
 
     @GetMapping
-    public ResponseEntity<List<SupervisorDTO>> getSupervisors() {
-        List<SupervisorDTO> supervisors = supervisorService.toDTOs(supervisorService.getSupervisors());
+    public ResponseEntity<List<MinimalUserDTO>> getSupervisors() {
+        List<MinimalUserDTO> supervisors = supervisorService.toDTOs(supervisorService.getSupervisors());
         return ResponseEntity.ok(supervisors);
     }
 
     @PostMapping
-    public ResponseEntity<SupervisorDTO> createSupervisor(@Valid @RequestBody CreateSupervisorRequest request) {
-        SupervisorDTO supervisor = supervisorService.toDTO(supervisorService.createSupervisor(request));
+    public ResponseEntity<MinimalUserDTO> createSupervisor(@Valid @RequestBody CreateSupervisorRequest request) {
+        MinimalUserDTO supervisor = supervisorService.toDTO(supervisorService.createSupervisor(request));
         return ResponseEntity.ok(supervisor);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<SupervisorDTO> getSupervisor(@PathVariable Long id) {
-        SupervisorDTO supervisor = supervisorService.toDTO(supervisorService.getSupervisorById(id));
+    public ResponseEntity<MinimalUserDTO> getSupervisor(@PathVariable Long id) {
+        MinimalUserDTO supervisor = supervisorService.toDTO(supervisorService.getSupervisorById(id));
         return ResponseEntity.ok(supervisor);
     }
 
@@ -59,16 +59,16 @@ public class SupervisorController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<SupervisorDTO> getMe(Principal principal) {
-        SupervisorDTO supervisor = supervisorService.toDTO(supervisorService.getMe(principal));
+    public ResponseEntity<MinimalUserDTO> getMe(Principal principal) {
+        MinimalUserDTO supervisor = supervisorService.toDTO(supervisorService.getMe(principal));
         return ResponseEntity.ok(supervisor);
     }
 
     @Transactional
     @PatchMapping("/me")
-    public ResponseEntity<SupervisorDTO> updateMe(Principal principal,
+    public ResponseEntity<MinimalUserDTO> updateMe(Principal principal,
             @Valid @RequestBody UpdateSupervisorRequest request) {
-        SupervisorDTO supervisor = supervisorService.toDTO(supervisorService.updateMe(principal, request));
+        MinimalUserDTO supervisor = supervisorService.toDTO(supervisorService.updateMe(principal, request));
         return ResponseEntity.ok(supervisor);
     }
 
