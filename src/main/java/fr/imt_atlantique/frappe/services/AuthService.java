@@ -5,7 +5,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import fr.imt_atlantique.frappe.dtos.CreateUpdateUserRequest;
+import fr.imt_atlantique.frappe.dtos.CreateUserRequest;
 import fr.imt_atlantique.frappe.dtos.LoginRequest;
 import fr.imt_atlantique.frappe.dtos.LoginResponse;
 import fr.imt_atlantique.frappe.entities.Student;
@@ -30,7 +30,7 @@ public class AuthService {
         this.emailService = emailService;
     }
 
-    public void register(CreateUpdateUserRequest request) {
+    public void register(CreateUserRequest request) {
         Student student = studentService.createStudent(request);
         emailService.sendVerificationEmail(student);
     }

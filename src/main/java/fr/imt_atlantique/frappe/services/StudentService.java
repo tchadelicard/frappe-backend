@@ -6,7 +6,7 @@ import java.util.List;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
-import fr.imt_atlantique.frappe.dtos.CreateUpdateUserRequest;
+import fr.imt_atlantique.frappe.dtos.CreateUserRequest;
 import fr.imt_atlantique.frappe.dtos.StudentDTO;
 import fr.imt_atlantique.frappe.dtos.UpdateStudentRequest;
 import fr.imt_atlantique.frappe.entities.Campus;
@@ -52,7 +52,7 @@ public class StudentService {
                 .orElseThrow(() -> new StudentNotFoundException("Student not found"));
     }
 
-    public Student createStudent(CreateUpdateUserRequest request) {
+    public Student createStudent(CreateUserRequest request) {
         Student student = new Student();
         student.setUsername(request.getUsername());
         student.setPassword(userService.hashPassword(request.getPassword()));

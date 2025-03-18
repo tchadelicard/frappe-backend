@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class CreateSupervisorRequest extends CreateUpdateUserRequest {
+public class CreateSupervisorRequest extends CreateUserRequest {
     @NotNull(message = "Campus ID is mandatory")
     private Long campusId;
 }
