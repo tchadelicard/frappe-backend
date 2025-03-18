@@ -13,6 +13,6 @@ public class MeetingRequestDTO {
     private String location;
     private String requestDescription;
     private String status;
-    private Long studentId;
-    private Long supervisorId;
+    private MinimalUserDTO student;
+    private MinimalUserDTO supervisor;
 }
