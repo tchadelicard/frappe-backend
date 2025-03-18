@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 @Data
-public class CreateUpdateUserRequest {
+public class CreateUserRequest {
     @NotBlank(message = "Username is mandatory")
     private String username;
 
