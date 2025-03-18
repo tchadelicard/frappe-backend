@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import fr.imt_atlantique.frappe.dtos.CreateSupervisorRequest;
 import fr.imt_atlantique.frappe.dtos.EncryptionResult;
+import fr.imt_atlantique.frappe.dtos.MinimalSupervisorDTO;
 import fr.imt_atlantique.frappe.dtos.MinimalUserDTO;
 import fr.imt_atlantique.frappe.dtos.SupervisorDTO;
 import fr.imt_atlantique.frappe.dtos.UpdateSupervisorRequest;
@@ -39,7 +40,7 @@ public class SupervisorService {
         List<String> roles = userService.getUserRoles();
 
         if (roles.contains("ROLE_STUDENT"))
-            return modelMapper.map(supervisor, MinimalUserDTO.class);
+            return modelMapper.map(supervisor, MinimalSupervisorDTO.class);
 
         return modelMapper.map(supervisor, SupervisorDTO.class);
     }
