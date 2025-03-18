@@ -7,4 +7,5 @@ public class MinimalUserDTO {
     private Long id;
     private String firstName;
     private String lastName;
+    private Long campusId;
 }

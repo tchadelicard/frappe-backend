@@ -5,8 +5,6 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class UserDTO extends MinimalUserDTO {
-    private String username;
-    private String email;
-    private String phoneNumber;
+public class MinimalSupervisorDTO extends MinimalUserDTO {
+    private String meetingUrl;
 }
