@@ -19,6 +19,9 @@ import fr.imt_atlantique.frappe.entities.MeetingRequest;
 import fr.imt_atlantique.frappe.entities.Student;
 import fr.imt_atlantique.frappe.entities.Supervisor;
 import fr.imt_atlantique.frappe.events.MeetingRequestCreatedEvent;
+import fr.imt_atlantique.frappe.exceptions.ActionNotFoundException;
+import fr.imt_atlantique.frappe.exceptions.InvalidDateRangeException;
+import fr.imt_atlantique.frappe.exceptions.MeetingRequestNotFoundException;
 import fr.imt_atlantique.frappe.repositories.MeetingRequestRepository;
 import jakarta.mail.MessagingException;
 import lombok.extern.slf4j.Slf4j;
@@ -80,7 +83,7 @@ public class MeetingRequestService {
                         slot.getEnd().equals(request.getEndDate().atOffset(ZoneOffset.UTC)));
 
         if (!isSlotAvailable) {
-            throw new RuntimeException("Slot is not available");
+            throw new InvalidDateRangeException("Slot is not available");
         }
 
         MeetingRequest meetingRequest = saveMeetingRequest(request, student, supervisor);
@@ -92,7 +95,7 @@ public class MeetingRequestService {
 
     private void validateMeetingRequest(CreateMeetingRequestRequest request) {
         if (!request.getStartDate().toLocalDate().equals(request.getEndDate().toLocalDate())) {
-            throw new RuntimeException("Meeting must be on the same day");
+            throw new InvalidDateRangeException("Meeting must be on the same day");
         }
     }
 
@@ -113,7 +116,7 @@ public class MeetingRequestService {
 
     public void updateMeetingRequestStatus(String email, Long meetingRequestId, String status) {
         MeetingRequest meetingRequest = meetingRequestRepository.findById(meetingRequestId)
-                .orElseThrow(() -> new RuntimeException("Meeting request not found"));
+                .orElseThrow(() -> new MeetingRequestNotFoundException("Meeting request not found"));
         meetingRequest.setStatus(status);
         meetingRequestRepository.save(meetingRequest);
         log.info("✅ Meeting request updated for: {}", email);
@@ -121,11 +124,11 @@ public class MeetingRequestService {
 
     public Action getAction(Long id) {
         MeetingRequest meetingRequest = meetingRequestRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Meeting request not found"));
+                .orElseThrow(() -> new MeetingRequestNotFoundException("Meeting request not found"));
 
         Action action = meetingRequest.getAction();
         if (action == null) {
-            throw new RuntimeException("Action not found");
+            throw new ActionNotFoundException("Action not found");
         }
 
         return action;
@@ -133,7 +136,7 @@ public class MeetingRequestService {
 
     public Action createAction(Long id, ActionDTO actionDTO) {
         MeetingRequest meetingRequest = meetingRequestRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Meeting request not found"));
+                .orElseThrow(() -> new MeetingRequestNotFoundException("Meeting request not found"));
 
         Action action = new fr.imt_atlantique.frappe.entities.Action();
         action.setNotes(actionDTO.getNotes());
