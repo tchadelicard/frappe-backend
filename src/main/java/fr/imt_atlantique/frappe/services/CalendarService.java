@@ -35,6 +35,7 @@ import net.fortuna.ical4j.model.property.Attendee;
 import net.fortuna.ical4j.model.property.Clazz;
 import net.fortuna.ical4j.model.property.Description;
 import net.fortuna.ical4j.model.property.LastModified;
+import net.fortuna.ical4j.model.property.Location;
 import net.fortuna.ical4j.model.property.Method;
 import net.fortuna.ical4j.model.property.Organizer;
 import net.fortuna.ical4j.model.property.ProdId;
@@ -42,6 +43,7 @@ import net.fortuna.ical4j.model.property.Sequence;
 import net.fortuna.ical4j.model.property.Status;
 import net.fortuna.ical4j.model.property.Transp;
 import net.fortuna.ical4j.model.property.Trigger;
+import net.fortuna.ical4j.vcard.property.Uid;
 
 @Service
 @Slf4j
@@ -91,6 +93,8 @@ public class CalendarService {
         ZonedDateTime endDate = convertLocalDateTimeToZonedDateTime(meetingRequest.getEndDate());
 
         VEvent vevent = (VEvent) new VEvent(startDate, endDate, meetingRequest.getTheme())
+                .withProperty(new Uid("frappe-" + meetingRequest.getId()))
+                .withProperty(new Location(meetingRequest.getLocation()))
                 .withProperty(new Description(meetingRequest.getRequestDescription()))
                 .withProperty(new Attendee("mailto:" + meetingRequest.getStudent().getEmail())
                         .withParameter(new Cn(meetingRequest.getStudent().getFirstName() + " "
