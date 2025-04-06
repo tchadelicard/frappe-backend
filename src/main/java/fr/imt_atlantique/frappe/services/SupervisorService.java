@@ -1,117 +1,172 @@
 package fr.imt_atlantique.frappe.services;
 
-import fr.imt_atlantique.frappe.dtos.CreateSupervisorRequest;
-import fr.imt_atlantique.frappe.dtos.EncryptionResult;
-import fr.imt_atlantique.frappe.dtos.RegistrationRequest;
-import fr.imt_atlantique.frappe.dtos.SupervisorDTO;
-import fr.imt_atlantique.frappe.entities.Supervisor;
-import fr.imt_atlantique.frappe.repositories.CampusRepository;
-import fr.imt_atlantique.frappe.repositories.SupervisorRepository;
-import fr.imt_atlantique.frappe.repositories.UserRepository;
+import java.security.Principal;
+import java.util.List;
+
 import org.modelmapper.ModelMapper;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.regex.Pattern;
+import fr.imt_atlantique.frappe.dtos.CreateSupervisorRequest;
+import fr.imt_atlantique.frappe.dtos.EncryptionResult;
+import fr.imt_atlantique.frappe.dtos.MinimalSupervisorDTO;
+import fr.imt_atlantique.frappe.dtos.MinimalUserDTO;
+import fr.imt_atlantique.frappe.dtos.SupervisorDTO;
+import fr.imt_atlantique.frappe.dtos.UpdateSupervisorRequest;
+import fr.imt_atlantique.frappe.entities.Campus;
+import fr.imt_atlantique.frappe.entities.MeetingRequest;
+import fr.imt_atlantique.frappe.entities.Supervisor;
+import fr.imt_atlantique.frappe.exceptions.SupervisorNotFoundException;
+import fr.imt_atlantique.frappe.repositories.SupervisorRepository;
 
 @Service
 public class SupervisorService {
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final SupervisorRepository supervisorRepository;
     private final ModelMapper modelMapper;
-    private final PasswordEncoder passwordEncoder;
     private final EncryptionService encryptionService;
-    private final CampusRepository campusRepository;
+    private final CampusService campusService;
 
-    public SupervisorService(UserRepository userRepository, SupervisorRepository supervisorRepository, ModelMapper modelMapper, PasswordEncoder passwordEncoder, EncryptionService encryptionService, CampusRepository campusRepository) {
-        this.userRepository = userRepository;
+    public SupervisorService(UserService userService, SupervisorRepository supervisorRepository,
+            ModelMapper modelMapper, EncryptionService encryptionService,
+            CampusService campusService) {
+        this.userService = userService;
         this.supervisorRepository = supervisorRepository;
         this.modelMapper = modelMapper;
-        this.passwordEncoder = passwordEncoder;
         this.encryptionService = encryptionService;
-        this.campusRepository = campusRepository;
+        this.campusService = campusService;
     }
 
-    public ResponseEntity<List<SupervisorDTO>> getSupervisors() {
-        return ResponseEntity.ok(
-          supervisorRepository
-                  .findAll()
-                  .stream()
-                  .map(supervisor -> modelMapper.map(supervisor, SupervisorDTO.class))
-                  .toList()
-        );
+    public MinimalUserDTO toDTO(Supervisor supervisor) {
+        List<String> roles = userService.getUserRoles();
+
+        if (roles.contains("ROLE_STUDENT"))
+            return modelMapper.map(supervisor, MinimalSupervisorDTO.class);
+
+        return modelMapper.map(supervisor, SupervisorDTO.class);
     }
 
-    public ResponseEntity<?> createSupervisor(CreateSupervisorRequest request) {
-        String validationError = validateCreateSupervisorRequest(request);
-        if (validationError != null) {
-            return ResponseEntity.badRequest().body(validationError);
-        }
+    public List<MinimalUserDTO> toDTOs(List<Supervisor> supervisors) {
+        return supervisors.stream()
+                .map(supervisor -> toDTO(supervisor))
+                .toList();
+    }
 
-        try {
-            // Encrypt caldavPassword using EncryptionService
-            EncryptionResult encryptionResult = encryptionService.encryptAndPrepareData(request.getCaldavPassword());
+    public List<Supervisor> getSupervisors() {
+        return supervisorRepository
+                .findAll()
+                .stream()
+                .toList();
+    }
 
-            // Create supervisor
-            Supervisor supervisor = new Supervisor();
+    public Supervisor createSupervisor(CreateSupervisorRequest request) {
+        userService.ensureUserEmailDoesNotExist(request.getEmail());
+        userService.ensureUserUsernameDoesNotExist(request.getUsername());
+
+        Campus campus = campusService.getCampusById(request.getCampusId());
+
+        // Create supervisor
+        Supervisor supervisor = new Supervisor();
+        supervisor.setUsername(request.getUsername());
+        supervisor.setEmail(request.getEmail());
+        supervisor.setPassword(userService.hashPassword(request.getPassword()));
+        supervisor.setFirstName(request.getFirstName());
+        supervisor.setLastName(request.getLastName());
+        supervisor.setCampus(campus);
+        supervisor.setEnabled(true);
+
+        supervisorRepository.save(supervisor);
+
+        return supervisor;
+    }
+
+    public Supervisor getMe(Principal principal) {
+        Supervisor supervisor = supervisorRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new SupervisorNotFoundException("Supervisor not found"));
+        return supervisor;
+    }
+
+    public Supervisor updateMe(Principal principal, UpdateSupervisorRequest request) {
+        Supervisor supervisor = supervisorRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new SupervisorNotFoundException("Supervisor not found"));
+
+        // Validate username uniqueness if provided and different from the current one
+        if (request.getUsername() != null && !request.getUsername().equals(supervisor.getUsername())) {
+            userService.ensureUserEmailDoesNotExist(request.getUsername());
             supervisor.setUsername(request.getUsername());
+        }
+
+        // Validate email uniqueness if provided and different from the current one
+        if (request.getEmail() != null && !request.getEmail().equals(supervisor.getEmail())) {
+            userService.ensureUserEmailDoesNotExist(request.getEmail());
             supervisor.setEmail(request.getEmail());
-            supervisor.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+
+        // Update password if provided (regex in DTO ensures validity)
+        if (request.getPassword() != null) {
+            supervisor.setPassword(userService.hashPassword(request.getPassword()));
+        }
+
+        // Update first name if provided
+        if (request.getFirstName() != null) {
             supervisor.setFirstName(request.getFirstName());
+        }
+
+        // Update last name if provided
+        if (request.getLastName() != null) {
             supervisor.setLastName(request.getLastName());
-            supervisor.setCampus(campusRepository.findById(request.getCampusId()).orElseThrow());
+        }
+
+        // Update campus if provided
+        if (request.getCampusId() != null) {
+            Campus campus = campusService.getCampusById(request.getCampusId());
+            supervisor.setCampus(campus);
+        }
+
+        // Update optional fields if provided
+        if (request.getMeetingUrl() != null) {
             supervisor.setMeetingUrl(request.getMeetingUrl());
+        }
+
+        if (request.getCaldavUsername() != null) {
             supervisor.setCaldavUsername(request.getCaldavUsername());
-            supervisor.setCaldavPassword(encryptionResult.getEncryptedData()); // Store encrypted password
-            supervisor.setCaldavPasswordSalt(encryptionResult.getSalt());      // Store salt
-            supervisor.setCaldavPasswordIv(encryptionResult.getIv());          // Store IV
-            supervisor.setEnabled(true);
+        }
 
-            supervisorRepository.save(supervisor);
+        if (request.getCaldavPassword() != null) {
+            try {
+                EncryptionResult encryptionResult = encryptionService
+                        .encryptAndPrepareData(request.getCaldavPassword());
+                supervisor.setCaldavPassword(encryptionResult.getEncryptedData());
+                supervisor.setCaldavPasswordIv(encryptionResult.getIv());
+                supervisor.setCaldavPasswordSalt(encryptionResult.getSalt());
+            } catch (Exception e) {
+                throw new RuntimeException("Error encrypting password");
+            }
+        }
 
-            return ResponseEntity.ok(modelMapper.map(supervisor, SupervisorDTO.class));
-        } catch (Exception e) {
-            // Log the error and return a generic error message
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error occurred while creating supervisor.");
-        }
-    }
-    private String validateCreateSupervisorRequest(CreateSupervisorRequest request) {
-        if (!isValidEmail(request.getEmail())) {
-            return "Invalid email format.";
-        }
-        if (!isValidPassword(request.getPassword())) {
-            return "Password must be at least 8 characters, include an uppercase letter, a lowercase letter, a number, and a special character.";
-        }
-        if (userRepository.existsByEmail(request.getEmail())) {
-            return "Email is already taken.";
-        }
-        if (userRepository.existsByUsername(request.getUsername())) {
-            return "Username is already taken.";
-        }
-        if (!campusRepository.existsById(request.getCampusId())) {
-            return "Campus does not exist.";
-        }
-        return null;
+        // Save updated supervisor
+        supervisorRepository.save(supervisor);
+
+        return supervisor;
     }
 
-    private boolean isValidEmail(String email) {
-        String emailRegex = "^[A-Za-z0-9+_.-]+@imt-atlantique\\.(?:fr|net)$";
-        return Pattern.matches(emailRegex, email);
+    public List<MeetingRequest> getMeetingRequests(Long id) {
+        Supervisor supervisor = supervisorRepository.findById(id)
+                .orElseThrow(() -> new SupervisorNotFoundException("Supervisor not found"));
+        return supervisor.getMeetingRequests()
+                .stream()
+                .toList();
     }
 
-    private boolean isValidPassword(String password) {
-        String passwordRegex = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$";
-        return Pattern.matches(passwordRegex, password);
+    public List<MeetingRequest> getMeetingRequests(Principal principal) {
+        Supervisor supervisor = supervisorRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new SupervisorNotFoundException("Supervisor not found"));
+        return supervisor.getMeetingRequests()
+                .stream()
+                .toList();
     }
 
-    private boolean isValidPhoneNumber(String phoneNumber) {
-        String phoneRegex = "^[+]?[0-9]{10,15}$";
-        return Pattern.matches(phoneRegex, phoneNumber);
+    public Supervisor getSupervisorById(Long id) {
+        return supervisorRepository.findById(id)
+                .orElseThrow(() -> new SupervisorNotFoundException("Supervisor not found"));
     }
-
 }

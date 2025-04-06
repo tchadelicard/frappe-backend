@@ -1,239 +1,60 @@
 package fr.imt_atlantique.frappe.services;
 
-import fr.imt_atlantique.frappe.dtos.*;
-import fr.imt_atlantique.frappe.entities.Student;
-import fr.imt_atlantique.frappe.repositories.StudentRepository;
-import fr.imt_atlantique.frappe.entities.User;
-import fr.imt_atlantique.frappe.repositories.UserRepository;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.regex.Pattern;
+import fr.imt_atlantique.frappe.dtos.CreateUserRequest;
+import fr.imt_atlantique.frappe.dtos.LoginRequest;
+import fr.imt_atlantique.frappe.dtos.LoginResponse;
+import fr.imt_atlantique.frappe.entities.Student;
+import fr.imt_atlantique.frappe.entities.User;
 
 @Service
 public class AuthService {
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final JavaMailSender mailSender;
+    private final AuthenticationManager authenticationManager;
+    private final UserService userService;
+    private final StudentService studentService;
     private final JwtService jwtService;
-    private final StudentRepository studentRepository;
+    private final EmailService emailService;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JavaMailSender mailSender, JwtService jwtService,
-                       StudentRepository studentRepository) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.mailSender = mailSender;
+    public AuthService(AuthenticationManager authenticationManager, UserService userService,
+            StudentService studentService, JwtService jwtService,
+            EmailService emailService) {
+        this.authenticationManager = authenticationManager;
+        this.userService = userService;
+        this.studentService = studentService;
         this.jwtService = jwtService;
-        this.studentRepository = studentRepository;
+        this.emailService = emailService;
     }
 
-    @Transactional
-    public RegistrationResponse register(RegistrationRequest request) {
-        String validationMessage = validateRegistrationRequest(request);
-        if (validationMessage != null) {
-            return RegistrationResponse.builder()
-                    .success(false)
-                    .message(validationMessage)
-                    .build();
-        }
-
-        Student student = createStudent(request);
-        studentRepository.save(student);
-
-        try {
-            sendVerificationEmail(student);
-        } catch (MessagingException e) {
-            return RegistrationResponse.builder()
-                    .success(false)
-                    .message("Error sending verification email.")
-                    .build();
-        }
-
-        return RegistrationResponse.builder()
-                .success(true)
-                .message("User registered successfully. Please verify your email.")
-                .build();
+    public void register(CreateUserRequest request) {
+        Student student = studentService.createStudent(request);
+        emailService.sendVerificationEmail(student);
     }
 
-    @Transactional
     public LoginResponse login(LoginRequest request) {
-        Optional<User> userOptional = userRepository.findByEmail(request.getEmail());
-        if (userOptional.isEmpty() || !passwordEncoder.matches(request.getPassword(), userOptional.get().getPassword())) {
-            return LoginResponse.builder()
-                    .token(null)
-                    .message("Invalid email or password.")
-                    .role(null)
-                    .build();
-        }
+        // User user = userService.processLoginRequest(request);
 
-        User user = userOptional.get();
-        if (!user.isEnabled()) {
-            return LoginResponse.builder()
-                    .token(null)
-                    .message("Account is not verified.")
-                    .role(null)
-                    .build();
-        }
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+        User user = (User) authentication.getPrincipal();
 
         String token = jwtService.generateToken(user);
         return LoginResponse.builder()
                 .token(token)
-                .message("Login successful.")
                 .role(user.getAuthorities().iterator().next().getAuthority())
                 .build();
     }
 
-    @Transactional
-    public VerifyResponse verifyAccount(String token) {
-        Optional<User> userOptional = userRepository.findByValidationCode(token);
-        if (userOptional.isEmpty()) {
-            return VerifyResponse.builder()
-                    .success(false)
-                    .message("Invalid or expired validation token.")
-                    .build();
-        }
-
-        User user = userOptional.get();
-        if (user.getValidationCodeExpiry().isBefore(Instant.now())) {
-            return VerifyResponse.builder()
-                    .success(false)
-                    .message("Validation token has expired.")
-                    .build();
-        }
-
-        enableUserAccount(user);
-        return VerifyResponse.builder()
-                .success(true)
-                .message("Account verified successfully!")
-                .build();
+    public void verifyAccount(String validationCode) {
+        userService.checkUserValidationCode(validationCode);
     }
 
-    @Transactional
-    public ResendResponse resendVerificationCode(String email) {
-        Optional<User> userOptional = userRepository.findByEmail(email);
-        if (userOptional.isEmpty()) {
-            return ResendResponse.builder()
-                    .success(false)
-                    .message("User not found.")
-                    .build();
-        }
-
-        User user = userOptional.get();
-        if (user.isEnabled()) {
-            return ResendResponse.builder()
-                    .success(false)
-                    .message("Account is already verified.")
-                    .build();
-        }
-
-        user.setValidationCode(UUID.randomUUID().toString());
-        user.setValidationCodeExpiry(Instant.now().plus(Duration.ofMinutes(10)));
-        userRepository.save(user);
-
-        try {
-            sendVerificationEmail(user);
-        } catch (MessagingException e) {
-            return ResendResponse.builder()
-                    .success(false)
-                    .message("Error sending verification email.")
-                    .build();
-        }
-
-        return ResendResponse.builder()
-                .success(true)
-                .message("Verification code sent successfully.")
-                .build();
-    }
-    
-    @Transactional
-    public ChangePasswordResponse changePassword(ChangePasswordRequest request) {
-        Optional<User> userOptional = userRepository.findByEmail(request.getEmail());
-        if (userOptional.isEmpty() || !passwordEncoder.matches(request.getPassword(), userOptional.get().getPassword())) {
-            return ChangePasswordResponse.builder()
-                    .success(false)
-                    .message("Invalid email or password.")
-                    .build();
-        }
-
-        User user = userOptional.get();
-        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
-        userRepository.save(user);
-
-        return ChangePasswordResponse.builder()
-                .success(true)
-                .message("Password changed successfully.")
-                .build();
-    }
-    
-
-    private String validateRegistrationRequest(RegistrationRequest request) {
-        if (!isValidEmail(request.getEmail())) {
-            return "Invalid email format.";
-        }
-        if (!isValidPassword(request.getPassword())) {
-            return "Password must be at least 8 characters, include an uppercase letter, a lowercase letter, a number, and a special character.";
-        }
-        if (userRepository.existsByEmail(request.getEmail())) {
-            return "Email is already taken.";
-        }
-        if (userRepository.existsByUsername(request.getUsername())) {
-            return "Username is already taken.";
-        }
-        return null;
-    }
-
-    private Student createStudent(RegistrationRequest request) {
-        Student student = new Student();
-        student.setUsername(request.getUsername());
-        student.setPassword(passwordEncoder.encode(request.getPassword()));
-        student.setFirstName(request.getFirstName());
-        student.setLastName(request.getLastName());
-        student.setEmail(request.getEmail());
-        student.setEnabled(false);
-        student.setValidationCode(UUID.randomUUID().toString());
-        student.setValidationCodeExpiry(Instant.now().plus(Duration.ofMinutes(10)));
-        return student;
-    }
-
-    private void enableUserAccount(User user) {
-        user.setEnabled(true);
-        user.setValidationCode(null);
-        user.setValidationCodeExpiry(null);
-        userRepository.save(user);
-    }
-
-    private void sendVerificationEmail(User user) throws MessagingException {
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true);
-        helper.setFrom("no-reply@localhost.local");
-        helper.setTo(user.getEmail());
-        helper.setSubject("Verify Your Account");
-        helper.setText("Validation code: " + user.getValidationCode());
-        mailSender.send(message);
-    }
-
-    private boolean isValidEmail(String email) {
-        String emailRegex = "^[A-Za-z0-9+_.-]+@imt-atlantique\\.(?:fr|net)$";
-        return Pattern.matches(emailRegex, email);
-    }
-
-    private boolean isValidPassword(String password) {
-        String passwordRegex = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$";
-        return Pattern.matches(passwordRegex, password);
-    }
-
-    private boolean isValidPhoneNumber(String phoneNumber) {
-        String phoneRegex = "^[+]?[0-9]{10,15}$";
-        return Pattern.matches(phoneRegex, phoneNumber);
+    public void resendVerificationCode(String email) {
+        User user = userService.resendValidationCode(email);
+        emailService.sendVerificationEmail(user);
     }
 }

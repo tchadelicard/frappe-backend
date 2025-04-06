@@ -1,95 +1,113 @@
 package fr.imt_atlantique.frappe.services;
 
-import fr.imt_atlantique.frappe.dtos.RegistrationRequest;
+import java.security.Principal;
+import java.util.List;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
+
+import fr.imt_atlantique.frappe.dtos.CreateUserRequest;
 import fr.imt_atlantique.frappe.dtos.StudentDTO;
-import fr.imt_atlantique.frappe.dtos.StudentUpdateRequest;
+import fr.imt_atlantique.frappe.dtos.UpdateStudentRequest;
 import fr.imt_atlantique.frappe.entities.Campus;
 import fr.imt_atlantique.frappe.entities.CreditTransfer;
+import fr.imt_atlantique.frappe.entities.MeetingRequest;
 import fr.imt_atlantique.frappe.entities.Student;
-import fr.imt_atlantique.frappe.repositories.CampusRepository;
-import fr.imt_atlantique.frappe.repositories.CreditTransferRepository;
+import fr.imt_atlantique.frappe.exceptions.StudentNotFoundException;
 import fr.imt_atlantique.frappe.repositories.StudentRepository;
-import org.modelmapper.ModelMapper;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.security.Principal;
-import java.util.Optional;
-import java.util.regex.Pattern;
 
 @Service
 public class StudentService {
     private final StudentRepository studentRepository;
+    private final UserService userService;
     private final ModelMapper modelMapper;
-    private final CampusRepository campusRepository;
-    private final CreditTransferRepository creditTransferRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final CampusService campusService;
+    private final CreditTransferService creditTransferService;
 
-    public StudentService(StudentRepository studentRepository, ModelMapper modelMapper, CampusRepository campusRepository, CreditTransferRepository creditTransferRepository, PasswordEncoder passwordEncoder) {
+    public StudentService(StudentRepository studentRepository, UserService userService, ModelMapper modelMapper,
+            CampusService campusService, CreditTransferService creditTransferService) {
         this.studentRepository = studentRepository;
+        this.userService = userService;
         this.modelMapper = modelMapper;
-        this.campusRepository = campusRepository;
-        this.creditTransferRepository = creditTransferRepository;
-        this.passwordEncoder = passwordEncoder;
+        this.campusService = campusService;
+        this.creditTransferService = creditTransferService;
     }
 
-    public ResponseEntity<StudentDTO> getMe(Principal principal) {
-        Optional<Student> student = studentRepository.findByUsername(principal.getName());
-        if (student.isPresent()) {
-            modelMapper.map(student.get(), StudentDTO.class);
-            return ResponseEntity.ok(modelMapper.map(student.get(), StudentDTO.class));
-        }
-        return ResponseEntity.notFound().build();
+    public StudentDTO toDTO(Student student) {
+        return modelMapper.map(student, StudentDTO.class);
     }
 
+    public List<StudentDTO> toDTOs(List<Student> students) {
+        return students.stream()
+                .map(student -> modelMapper.map(student, StudentDTO.class))
+                .toList();
+    }
 
-    @Transactional
-    public ResponseEntity<StudentDTO> updateMe(StudentUpdateRequest request, Principal principal) {
-        Optional<Student> student = studentRepository.findByUsername(principal.getName());
-        if (student.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        Student studentToUpdate = student.get();
-        if (request.getPassword() != null && isValidPassword(request.getPassword()) ) {
-            studentToUpdate.setPassword(passwordEncoder.encode(request.getPassword()));
+    public List<Student> getStudents() {
+        return studentRepository.findAll();
+    }
+
+    public Student getMe(Principal principal) {
+        return studentRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new StudentNotFoundException("Student not found"));
+    }
+
+    public Student createStudent(CreateUserRequest request) {
+        Student student = new Student();
+        student.setUsername(request.getUsername());
+        student.setPassword(userService.hashPassword(request.getPassword()));
+        student.setFirstName(request.getFirstName());
+        student.setLastName(request.getLastName());
+        student.setEmail(request.getEmail());
+        student.setEnabled(false);
+        userService.checkIfUserExists(student);
+        userService.generateValidationCode(student);
+        studentRepository.save(student);
+        return student;
+    }
+
+    public Student updateMe(UpdateStudentRequest request, Principal principal) {
+        Student student = studentRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new StudentNotFoundException("Student not found"));
+        if (request.getPassword() != null) {
+            student.setPassword(userService.hashPassword(request.getPassword()));
         }
         if (request.getFirstName() != null) {
-            studentToUpdate.setFirstName(request.getFirstName());
+            student.setFirstName(request.getFirstName());
         }
         if (request.getLastName() != null) {
-            studentToUpdate.setLastName(request.getLastName());
+            student.setLastName(request.getLastName());
         }
         if (request.getPhoneNumber() != null) {
-            studentToUpdate.setPhoneNumber(request.getPhoneNumber());
+            student.setPhoneNumber(request.getPhoneNumber());
         }
-        if (request.getCampusId() != null ) {
-            Optional<Campus> campus = campusRepository.findById(request.getCampusId());
-            if (campus.isEmpty()) {
-                return ResponseEntity.badRequest().build();
-            }
-            studentToUpdate.setCampus(campus.get());
+        if (request.getCampusId() != null) {
+            Campus campus = campusService.getCampusById(request.getCampusId());
+            student.setCampus(campus);
         }
         if (request.getGender() != null) {
-            studentToUpdate.setGender(request.getGender());
+            student.setGender(request.getGender());
         }
         if (request.getNationality() != null) {
-            studentToUpdate.setNationality(request.getNationality());
+            student.setNationality(request.getNationality());
         }
         if (request.getCreditTransferId() != null) {
-            Optional<CreditTransfer> creditTransfer = creditTransferRepository.findById(request.getCreditTransferId());
-            if (creditTransfer.isEmpty()) {
-                return ResponseEntity.badRequest().build();
-            }
-            studentToUpdate.setCreditTransfer(creditTransfer.get());
+            CreditTransfer creditTransfer = creditTransferService.getCreditTransferById(request.getCreditTransferId());
+            student.setCreditTransfer(creditTransfer);
         }
-        studentRepository.save(studentToUpdate);
-        return ResponseEntity.ok(modelMapper.map(studentToUpdate, StudentDTO.class));
+        studentRepository.save(student);
+        return student;
     }
 
-    private boolean isValidPassword(String password) {
-        String passwordRegex = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$";
-        return Pattern.matches(passwordRegex, password);
+    public List<MeetingRequest> getMeetingRequests(Principal principal) {
+        Student student = studentRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new StudentNotFoundException("Student not found"));
+        return student.getMeetingRequests().stream()
+                .toList();
+    }
+
+    public Student getStudentById(Long id) {
+        return studentRepository.findById(id)
+                .orElseThrow(() -> new StudentNotFoundException("Student not found"));
     }
 }

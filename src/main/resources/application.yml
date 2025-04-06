@@ -11,12 +11,23 @@ spring:
     hibernate:
       ddl-auto: update
   mail:
-    host: ${FRAPPE_MAIL_HOST}
-    port: ${FRAPPE_MAIL_PORT}
+    host: ${FRAPPE_MAIL_SMTP_HOST}
+    port: ${FRAPPE_MAIL_SMTP_PORT}
+    username: ${FRAPPE_MAIL_USERNAME}
+    password: ${FRAPPE_MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 server:
   servlet:
     context-path: /api/v1
 frappe:
+  mail:
+    from: ${FRAPPE_MAIL_FROM}
+    host: ${FRAPPE_MAIL_IMAP_HOST}
   security:
     jwt:
       secret-key: ${FRAPPE_JWT_SECRET_KEY}
@@ -25,4 +36,6 @@ frappe:
       secret-key: ${FRAPPE_ENCRYPTION_SECRET_KEY}
   availability:
     api:
-        url: ${FRAPPE_AVAILABILITY_API_URL}
+      url: ${FRAPPE_AVAILABILITY_API_URL}
+  frontend:
+    url: ${FRAPPE_FRONTEND_URL}

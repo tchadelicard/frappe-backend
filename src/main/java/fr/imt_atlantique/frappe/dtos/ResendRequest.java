@@ -1,7 +1,3 @@
-
-
-
-
 package fr.imt_atlantique.frappe.dtos;
 
 import lombok.Data;
@@ -10,5 +6,3 @@ import lombok.Data;
 public class ResendRequest {
     private String email;
 }
-
-

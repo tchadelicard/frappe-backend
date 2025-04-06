@@ -1,15 +1,20 @@
 package fr.imt_atlantique.frappe.controllers;
 
-import fr.imt_atlantique.frappe.dtos.CreditTransferDTO;
-import fr.imt_atlantique.frappe.entities.CreditTransfer;
-import fr.imt_atlantique.frappe.services.CreditTransferService;
-import jakarta.validation.constraints.Min;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDate;
 import java.util.List;
+
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import fr.imt_atlantique.frappe.dtos.CreditTransferDTO;
+import fr.imt_atlantique.frappe.services.CreditTransferService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 
 @RestController
 @RequestMapping("/credit-transfers")
@@ -21,18 +26,21 @@ public class CreditTransferController {
         this.creditTransferService = creditTransferService;
     }
 
-    @GetMapping("/")
+    @GetMapping
     public ResponseEntity<List<CreditTransferDTO>> getCreditTransfers(
-            @RequestParam(required = false) String university,
-            @RequestParam(required = false) String country,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
-    ) {
-        return creditTransferService.findByFilters(university, country, startDate, endDate);
+            @Valid @RequestParam(required = false) String university,
+            @Valid @RequestParam(required = false) String country,
+            @Valid @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @Valid @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        List<CreditTransferDTO> creditTransfers = creditTransferService
+                .toDTOs(creditTransferService.filterCreditTransfers(university, country, startDate,
+                        endDate));
+        return ResponseEntity.ok(creditTransfers);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CreditTransferDTO> getCreditTransfer(@PathVariable @Min(1) Long id) {
-        return creditTransferService.findById(id);
+    public ResponseEntity<CreditTransferDTO> getCreditTransfer(@Valid @PathVariable @Min(1) Long id) {
+        CreditTransferDTO creditTransfer = creditTransferService.toDTO(creditTransferService.getCreditTransferById(id));
+        return ResponseEntity.ok(creditTransfer);
     }
 }

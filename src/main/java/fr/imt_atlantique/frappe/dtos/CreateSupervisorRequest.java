@@ -1,16 +1,12 @@
 package fr.imt_atlantique.frappe.dtos;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
-public class CreateSupervisorRequest {
-    private String username;
-    private String email;
-    private String password;
-    private String firstName;
-    private String lastName;
+@EqualsAndHashCode(callSuper = true)
+public class CreateSupervisorRequest extends CreateUserRequest {
+    @NotNull(message = "Campus ID is mandatory")
     private Long campusId;
-    private String meetingUrl;
-    private String caldavUsername;
-    private String caldavPassword;
 }

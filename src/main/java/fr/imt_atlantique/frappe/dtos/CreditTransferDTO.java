@@ -1,9 +1,9 @@
 package fr.imt_atlantique.frappe.dtos;
 
+import java.time.LocalDate;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor

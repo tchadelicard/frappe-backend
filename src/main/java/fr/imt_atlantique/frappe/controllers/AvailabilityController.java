@@ -1,12 +1,18 @@
 package fr.imt_atlantique.frappe.controllers;
 
-import fr.imt_atlantique.frappe.services.AvailabilityService;
+import java.time.LocalDate;
+import java.util.List;
+
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDate;
-import java.util.Date;
+import fr.imt_atlantique.frappe.dtos.AvailabilitySlotDTO;
+import fr.imt_atlantique.frappe.services.AvailabilityService;
 
 @RestController
 @RequestMapping("/availabilities")
@@ -19,12 +25,23 @@ public class AvailabilityController {
     }
 
     @GetMapping("/{id}/days")
-    public ResponseEntity<?> getAvailableDaysForSupervisor(@PathVariable Long id, @RequestParam String duration, @RequestParam LocalDate startDate, @RequestParam LocalDate endDate) {
-        return availabilityService.getAvailableDaysForSupervisor(id, duration, startDate, endDate);
+    public ResponseEntity<List<LocalDate>> getAvailableDaysForSupervisor(
+            @PathVariable Long id,
+            @RequestParam String duration,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        List<LocalDate> availableDays = availabilityService.getAvailableDaysForSupervisor(id, duration, startDate,
+                endDate);
+        return ResponseEntity.ok(availableDays);
     }
 
     @GetMapping("/{id}/slots")
-    public ResponseEntity<?> getAvailableSlotsForSupervisor(@PathVariable Long id, @RequestParam LocalDate date, @RequestParam String duration) {
-        return availabilityService.getAvailableSlotsForSupervisor(id, date, duration);
+    public ResponseEntity<List<AvailabilitySlotDTO>> getAvailableSlotsForSupervisor(
+            @PathVariable Long id,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam String duration) {
+        List<AvailabilitySlotDTO> availableSlots = availabilityService.getAvailableSlotsForSupervisor(id, date,
+                duration);
+        return ResponseEntity.ok(availableSlots);
     }
 }
